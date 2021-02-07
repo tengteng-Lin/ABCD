@@ -1,0 +1,1841 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Dashboard</title>
+
+    <!-- ================= Favicon ================== -->
+    <!-- Standard -->
+    <link rel="shortcut icon" href="http://placehold.it/64.png/000/fff">
+    <!-- Retina iPad Touch Icon-->
+    <link rel="apple-touch-icon" sizes="144x144" href="http://placehold.it/144.png/000/fff">
+    <!-- Retina iPhone Touch Icon-->
+    <link rel="apple-touch-icon" sizes="114x114" href="http://placehold.it/114.png/000/fff">
+    <!-- Standard iPad Touch Icon-->
+    <link rel="apple-touch-icon" sizes="72x72" href="http://placehold.it/72.png/000/fff">
+    <!-- Standard iPhone Touch Icon-->
+    <link rel="apple-touch-icon" sizes="57x57" href="http://placehold.it/57.png/000/fff">
+
+    <!-- Styles -->
+
+    <script src="../static/js/lib/jquery.min.js"></script><!-- jquery vendor -->
+    <script src="../static/js/lib/jquery.nanoscroller.min.js"></script><!-- nano scroller -->
+    <script src="../static/js/lib/sidebar.js"></script><!-- sidebar -->
+    <script src="../static/js/lib/bootstrap.min.js"></script><!-- bootstrap -->
+    <script src="../static/js/scripts.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="../static/js/lib/GraphHelper/ScatterHelper.js"></script>
+    <script src="../static/js/lib/GraphHelper/PieHelper.js"></script>
+    <script src="../static/js/lib/GraphHelper/ClusterHelper2.js"></script>
+    <script src="../static/js/lib/GraphHelper/ClusterHelper.js"></script>
+    <script src="../static/js/lib/GraphHelper/TreeHelper.js"></script>
+    <script src="../static/js/lib/GraphHelper/D3Helper.js"></script>
+
+    <link href="../static/css/lib/font-awesome.min.css" rel="stylesheet">
+    <link href="../static/css/lib/themify-icons.css" rel="stylesheet">
+    <link href="../static/css/lib/owl.carousel.min.css" rel="stylesheet"/>
+    <link href="../static/css/lib/owl.theme.default.min.css" rel="stylesheet"/>
+    <link href="../static/css/lib/weather-icons.css" rel="stylesheet"/>
+    <link href="../static/css/lib/mmc-chat.css" rel="stylesheet"/>
+    <link href="../static/css/lib/sidebar.css" rel="stylesheet">
+    <link href="../static/css/lib/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/css/lib/simdahs.css" rel="stylesheet">
+    <link href="../static/css/style.css" rel="stylesheet">
+    <link href="../static/css/lib/jq22.css" rel="stylesheet">
+
+    <script src="/js/lib/jquery.min.js"></script><!-- jquery vendor -->
+    <script src="/js/lib/jquery.nanoscroller.min.js"></script><!-- nano scroller -->
+    <script src="/js/lib/sidebar.js"></script><!-- sidebar -->
+    <script src="/js/lib/bootstrap.min.js"></script><!-- bootstrap -->
+    <script src="/js/scripts.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="/js/lib/GraphHelper/ScatterHelper.js"></script>
+    <script src="/js/lib/GraphHelper/PieHelper.js"></script>
+    <script src="js/lib/GraphHelper/ClusterHelper2.js"></script>
+    <script src="js/lib/GraphHelper/ClusterHelper.js"></script>
+    <script src="js/lib/GraphHelper/TreeHelper.js"></script>
+    <script src="js/lib/GraphHelper/D3Helper.js"></script>
+
+
+    <link href="/css/lib/font-awesome.min.css" rel="stylesheet">
+    <link href="/css/lib/themify-icons.css" rel="stylesheet">
+    <link href="/css/lib/owl.carousel.min.css" rel="stylesheet"/>
+    <link href="/css/lib/owl.theme.default.min.css" rel="stylesheet"/>
+    <link href="/css/lib/weather-icons.css" rel="stylesheet"/>
+    <link href="/css/lib/mmc-chat.css" rel="stylesheet"/>
+    <link href="/css/lib/sidebar.css" rel="stylesheet">
+    <link href="/css/lib/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/lib/simdahs.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/lib/jq22.css" rel="stylesheet">
+
+    <style type="text/css">
+        /*柱状图样式*/
+        .chart rect {
+            stroke: white;
+            fill: steelblue;
+        }
+
+        .chart rect:hover {
+            fill: brown;
+        }
+
+        /*控制坐标轴样式*/
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-family: sans-serif;
+            font-size: 11px;
+        }
+
+        .axis g text {
+            font-family: sans-serif;
+            font-size: 11px;
+            color: black;
+        }
+
+        .root circle {
+            fill: #fff;
+            stroke: steelblue;
+            stroke-width: 1.5px;
+
+        }
+        .node {
+            font: 12px sans-serif;
+        }
+        .treelink {
+            fill: none;
+            stroke: #508DA3;
+            stroke-width: 1.5px;
+        }
+
+        .link {
+            fill: none;
+
+            stroke-width: 1.5px;
+        }
+
+        .tooltip {
+            font-family: "Times New Roman";
+            font-size: 12px;
+            position: absolute;
+            background: #F5F8F7;
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 5px;
+            opacity: 1;
+        }
+    </style>
+
+
+</head>
+
+<body>
+
+<div class="sidebar sidebar-hide-to-small sidebar-shrink sidebar-gestures">
+    <div class="nano">
+        <div class="nano-content">
+
+            <ul>
+
+                <li class="active"><a href="javascript:void(0);" onclick="changeBar('overview')"> Overview </a></li>
+                <li><a href="javascript:void(0);" onclick="changeBar('patterns')"> Data Patterns </a></li>
+                <!--<li><a href="javascript:void(0);" onclick="changeBar('samples')"> Data Samples </a></li>-->
+                <!--<li><a href="javascript:void(0);" onclick="changeBar('explore')"> Explore </a></li>-->
+                <li><a href="javascript:void(0);" onclick="changeBar('metadata')"> Metadata </a></li>
+
+            </ul>
+        </div>
+    </div>
+</div><!-- /# sidebar -->
+
+
+<div class="header">
+    <div class="pull-left">
+        <div class="logo" id="sideLogo">
+            <a href="index.html">
+                <img class="full-logo" src="/images/websoft-logo.PNG">
+                <img class="small-logo" src="/images/websoft-logo.PNG">
+            </a>
+        </div>
+    </div>
+    <!--    右侧提醒-->
+    <div class="pull-right p-r-15">
+        <ul>
+            <li class="header-icon hover1">
+                <i class="ti-email"></i>
+
+
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="content-wrap">
+    <div class="main">
+        <div class="container-fluid p-0" style="position: relative">
+
+            <div class="page-header row">
+                <div class="page-title col-lg-9" style="width: 90%;">
+                    <!--<h1 th:text="${metadata.title}">Title of Dataset </h1>-->
+
+                </div>
+                <div class="pull-right p-r-15">
+                    <ul>
+                        <li class="header-icon hover2" style="color: #878787">
+                            <i class="ti-help-alt "></i>
+                            <div class="drop-down">
+                                <div class="dropdown-content-heading">
+                                    <span class="text-left">About this page</span>
+                                </div>
+                                <div class="dropdown-content-body">
+                                    <span>This is a new page.</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+
+
+
+
+            <div id="overview" class="divTab" style="z-index: 1">
+                <div id="containTab" class="containTab">
+                    <ul id="tabs" class="tabs">
+                        <li  class="current"><a  href="javascript:void(0);" onclick="getContent('overview',this)" title="statistics">statistics</a></li>
+                        <!--<li ><a href="javascript:void(0);" onclick="getContent('overview',this)" title="namespace">namespace</a></li>-->
+
+                    </ul>
+                    <div id="content" class="content">
+                    <span id="statistics" style="display: block;">
+
+                        <div class="panel panel-default m-t-15">
+                <div class="panel-heading">Class</div>
+                <div class="panel-body">
+                    <table class="table table-responsive table-hover ">
+                                <thead>
+                                <tr style="display:block">
+
+                                    <th style="width:52%;text-align: left;font-weight: bold">URI</th>
+                                        <th style="width:42%;text-align: left;font-weight: bold">Label</th>
+                                        <th style="width:20%;text-align: left;font-weight: bold">Count</th>
+                                </tr>
+                                </thead>
+
+                                <tbody style="display:block;height:300px;overflow-y:auto;">
+
+                                <tr style="width:20%;cursor:pointer" th:each="r,rStat: ${statistics.classDis}">
+
+                                    <td style="text-align: left;" th:text="${r.uri}"></td>
+                                    <td style="text-align: left;" th:text="${r.name}"></td>
+                                    <td style="text-align: left;" th:text="${r.value}"></td>
+                                </tr>
+
+
+                                </tbody>
+                            </table>
+
+
+                </div>
+            </div>
+                        <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">Property</div>
+                    <div class="panel-body">
+                        <table class="table table-responsive table-hover ">
+                                    <thead>
+                                    <tr style="display:block;">
+
+                                        <th style="width:52%;text-align: left;font-weight: bold">URI</th>
+                                        <th style="width:42%;text-align: left;font-weight: bold">Label</th>
+                                        <th style="width:20%;text-align: left;font-weight: bold">Count</th>
+                                    </tr>
+                                    </thead>
+
+                                    <tbody style="display:block;height:300px;overflow-y:scroll;">
+                                    <tr style="width:20%;cursor:pointer"
+                                        th:each="r,rStat: ${statistics.propertyDis}">
+
+                                        <td style="width:20%;text-align: left;" th:text="${r.uri}"></td>
+                                        <td style="width:20%;text-align: left;"
+                                            th:text="${r.name}"></td>
+                                        <td style="width:20%;text-align: left;" th:text="${r.value}"></td>
+                                    </tr>
+
+
+                                    </tbody>
+                                </table>
+
+
+                    </div>
+                </div>
+
+                    </span>
+
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="patterns" class="divTab" style="display: none" >
+                <div class="containTab">
+                    <ul class="tabs">
+                        <!--<li id="current"><a href="#" title="tab1">TOP-K</a></li>-->
+                        <li  class="current"><a href="javascript:void(0);" onclick="getContent('patterns',this)" title="PAnDA">PAnDA+</a></li>
+                        <li ><a  href="javascript:void(0);" onclick="getContent('patterns',this)" title="EDP">EDP</a></li>
+                        <li ><a href="javascript:void(0);" onclick="getContent('patterns',this)" title="LP">LP</a></li>
+
+                    </ul>
+
+                    <div  class="content">
+                        <img src="/images/loadding.gif" style="margin-left: 50%" id="patternsloading">
+
+
+                        <span id="PAnDA" style="display: none">
+                        <div class="panel panel-default m-t-15" id="description">
+                            <div class="panel-heading">description</div>
+                            <div class="panel-body">This is a dataset to describe</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="panel panel-default m-t-15" id="patternList">
+                                    <div class="panel-heading">pattern list</div>
+                                    <div class="panel-body">
+                                        <table class="table table-responsive">
+                                            <thead>
+
+                                    <tr style="display:block;">
+
+                                        <th style="width:20%;">pattern</th>
+                                        <th style="width:20%;text-align: left">count</th>
+
+                                    </tr>
+
+                                    </thead>
+
+                                            <tbody style="display:block;height:195px;overflow-y:auto;" class="needData"></tbody>
+                                        </table>
+                                     </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-lg-8">
+                        <div class="panel panel-default m-t-15">
+                            <div class="panel-heading">pattern graph</div>
+                            <div class="panel-body" >
+                                <div class="col-lg-1" >
+                                    <button class="btn-outline btn-rounded" onclick="nextOne(-1,'divP')" style="margin-top: 150px">back</button>
+
+                                </div>
+
+                                <div class="col-lg-10" id="divP">
+
+                                </div>
+
+                                <div class="col-lg-1" >
+                                    <button class="btn-outline btn-rounded" onclick="nextOne(1,'divP')" style="margin-top: 150px">next</button>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+
+
+                    </span>
+
+                        <span id="EDP" style="display: none;">
+                        <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">description</div>
+                    <div class="panel-body">This is a dataset to describe ……</div>
+                </div>
+
+                        <div class="row">
+                    <div class="col-lg-4">
+                        <div class="panel panel-default m-t-15" >
+                            <div class="panel-heading">pattern list</div>
+                            <div class="panel-body">
+
+                                    <div>
+
+
+                                        <table class="table table-responsive">
+                                            <thead>
+
+                                            <tr style="display:block;">
+
+                                                <th style="width:20%;">pattern</th>
+                                                <th style="width:20%;text-align: left">count</th>
+
+                                            </tr>
+
+                                            </thead>
+
+                                            <tbody style="display:block;height:195px;overflow-y:scroll;" class="needData"></tbody>
+                                        </table>
+
+
+                                    </div>
+                                <!--</div>-->
+
+                            </div>
+                        </div>
+
+
+
+                    </div>
+
+                    <div class="col-lg-8">
+                        <div class="panel panel-default m-t-15">
+                            <div class="panel-heading">pattern graph</div>
+                            <div class="panel-body">
+                                <div class="col-lg-1">
+                                    <button class="btn-outline btn-rounded" onclick="nextOne(-1,'divEDP')" style="margin-top: 150px">back</button>
+
+                                </div>
+
+                                <div class="col-lg-10" id="divEDP">
+
+                                </div>
+
+                                <div class="col-lg-1">
+                                    <button class="btn-outline btn-rounded" onclick="nextOne(1,'divEDP')" style="margin-top: 150px">next</button>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+
+
+                    </span>
+
+                        <span id="LP" style="display: none;">
+                        <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">description</div>
+                    <div class="panel-body">This is a dataset to describe</div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="panel panel-default m-t-15">
+                            <div class="panel-heading">pattern list</div>
+                            <div class="panel-body">
+                                <table class="table table-responsive">
+                                    <thead>
+
+                                    <tr style="display:block;">
+
+                                        <th style="width:20%;">pattern</th>
+                                        <th style="width:20%;text-align: left">count</th>
+
+                                    </tr>
+
+                                    </thead>
+
+                                    <tbody style="display:block;height:195px;overflow-y:scroll;" class="needData"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+
+                    <div class="col-lg-8">
+                        <div class="panel panel-default m-t-15">
+                            <div class="panel-heading">pattern graph</div>
+                            <div class="panel-body">
+                                <div class="col-lg-1">
+                                    <button class="btn-outline btn-rounded" onclick="nextOne(-1,'divLP')">back</button>
+
+                                </div>
+
+                                <div class="col-lg-10" id="divLP">
+
+                                </div>
+
+                                <div class="col-lg-1">
+                                    <button class="btn-outline btn-rounded" onclick="nextOne(1,'divLP')">next</button>
+
+                                </div>
+
+
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+
+
+                    </span>
+                        <span id="ExpLOD" style="display: none;">
+                        <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">Description</div>
+                    <div class="panel-body">Description of snippet or summary</div>
+                </div>
+
+
+                <div class="card alert">
+                    <div class="card-header">
+                        <h4>ExpLOD </h4>
+                        <div class="card-header-right-icon">
+                            <ul>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-1">
+                                <button onclick="nextOne(-1,'ExpLOD')" style="margin-top: 200px">back</button>
+
+                            </div>
+                            <div class="col-lg-10 needData" id="containerExpLOD"></div>
+                            <div class="col-lg-1">
+                                <button onclick="nextOne(1,'ExpLOD')" style="margin-top: 200px">next</button>
+
+                            </div>
+
+                        </div>
+                        <!--                        有好多个-->
+
+
+
+                    </div>
+
+
+                </div>
+
+
+                    </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="samples" class="divTab" style="display: none">
+                <div class="containTab">
+                    <ul class="tabs">
+                        <li class="current"><a href="#" title="TopK">TopK</a></li>
+                        <li ><a href="javascript:void(0);" onclick="getContent('samples',this)" title="HITS">HITS</a></li>
+                        <li ><a href="javascript:void(0);" onclick="getContent('samples',this)" title="PageRank">PageRank</a></li>
+                        <li ><a href="javascript:void(0);" onclick="getContent('samples',this)" title="TripleRank">TripleRank</a></li>
+                        <li ><a href="javascript:void(0);" onclick="getContent('samples',this)" title="ROCKER">ROCKER</a></li>
+                        <li ><a href="javascript:void(0);" onclick="getContent('samples',this)" title="Illustrative">Illustrative</a></li>
+                    </ul>
+
+
+                    <div class="content" >
+                        <img src="/images/loadding.gif" style="margin-left: 50%;" id="samplesloading">
+
+
+                        <span id="TopK" style="display: none;">
+                        <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">Description</div>
+                    <div class="panel-body">Description of snippet or summary</div>
+                </div>
+
+                <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">Top-20 Entities By Indegree</div>
+                    <div class="panel-body" style="height: 400px;overflow-y: auto">
+                        <table class="table table-responsive"  >
+                            <thead >
+                            <tr >
+
+                                <th style="font-weight: bold;">Entity</th>
+                                <th style="text-align: left;font-weight: bold;">Indegree Count</th>
+
+                            </tr>
+                            </thead>
+
+                            <tbody class="needData" id="inDegreeData"></tbody>
+                        </table>
+
+
+                    </div>
+                </div>
+
+                <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">Top-20 Entities By Outdegree</div>
+                    <div class="panel-body" style="height: 400px;overflow-y: auto">
+                        <table class="table table-responsive"  >
+                            <thead >
+                            <tr >
+
+                                <th style="font-weight: bold;">Entity</th>
+                                <th style="text-align: left;font-weight: bold;">Outdegree Count</th>
+
+                            </tr>
+                            </thead>
+
+                            <tbody class="needData" id="outDegreeData"></tbody>
+                        </table>
+
+
+                    </div>
+                </div>
+
+                    </span>
+                        <span id="HITS" style="display: none;">
+                        <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">Description</div>
+                    <div class="panel-body">Description of snippet or summary</div>
+                </div>
+
+                <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">hub rank</div>
+                    <div class="panel-body" style="height: 400px;overflow-y: auto">
+                        <table class="table table-responsive"  >
+                            <thead >
+                            <tr >
+
+                                <th style="font-weight: bold;">Entity</th>
+                                <th style="text-align: left;font-weight: bold;">Hub Score</th>
+
+                            </tr>
+                            </thead>
+
+                            <tbody class="needData" id="hubData"></tbody>
+                        </table>
+
+
+                    </div>
+                </div>
+
+                <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">authority rank</div>
+                    <div class="panel-body" style="height: 400px;overflow-y: auto">
+                        <table class="table table-responsive"  >
+                            <thead >
+                            <tr >
+
+                                <th style="font-weight: bold;">Entity</th>
+                                <th style="text-align: left;font-weight: bold;">Authority Score</th>
+
+                            </tr>
+                            </thead>
+
+                            <tbody class="needData" id="authorityData"></tbody>
+                        </table>
+
+
+                    </div>
+                </div>
+
+
+                    </span>
+                        <span id="PageRank" style="display: none;">
+                        <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">Description</div>
+                    <div class="panel-body">Description of snippet or summary</div>
+                </div>
+
+                <div class="panel panel-default m-t-15" id="extras">
+                    <div class="panel-heading">PageRank</div>
+                    <div class="panel-body" style="height: 400px;overflow-y: auto">
+                        <table class="table table-responsive"  >
+                            <thead >
+                            <tr >
+
+                                <th style="font-weight: bold;">Entity</th>
+                                <th style="text-align: left;font-weight: bold;">Score</th>
+
+                            </tr>
+                            </thead>
+
+                            <tbody class="needData"></tbody>
+                        </table>
+
+
+                    </div>
+                </div>
+
+
+                    </span>
+                        <span id="TripleRank" style="display: none;">
+                        <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">Description</div>
+                    <div class="panel-body">Description of snippet or summary</div>
+                </div>
+
+                            <!--<div class="row">-->
+                            <!--<div class="col-lg-6">-->
+                        <div class="panel panel-default m-t-15">
+                            <div class="panel-heading">Triple Rank</div>
+                            <div class="panel-body needData"></div>
+                        </div>
+
+
+                    </span>
+                        <span id="ROCKER" style="display: none;">
+                        <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">Description</div>
+                    <div class="panel-body">Description of snippet or summary</div>
+                       </div>
+                        <div class="needData" id="rockerData"></div>
+                    </span>
+                        <span id="Illustrative" style="display: none;"c>
+                        <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">Description</div>
+                    <div class="panel-body">Description of snippet or summary</div>
+                </div>
+
+
+                <div class="card alert">
+                    <div class="card-header">
+                        <h4>Illustrative Snippet </h4>
+                        <div class="card-header-right-icon">
+                            <ul>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div>
+                            <p id="noIll" style="display: none; margin-top: 100px;font-size: 30px;margin-left: 30px">该数据集暂时无法生成摘要</p>
+
+                            <div class="row">
+                                <div id="illSnippet" style="width: 500px;height:600px;cursor: pointer;" class="col-lg-10" th:class="needData"></div>
+                                <div style="float: right;" class="col-lg-2">
+                                    <input  id="lx_type" type="checkbox"   value="01"      onclick="lxclick()">type<b style="color:#CD9B1D">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;━━</b></input>
+                                    <br>
+                                    <input  id="lx_other" type="checkbox"   value="02"      onclick="lxclick()">other<b style="color:#2F4F4F">&nbsp;&nbsp;&nbsp;&nbsp;━━</b></input>
+                                    <br><br>
+
+                                    <input  id="lx_class" type="checkbox"   value="01"      onclick="lxclick()">class</input><b style="color:#CD9B1D">&nbsp;&nbsp;&nbsp;&nbsp;━━</b>
+                                    <br>
+                                    <input  id="lx_literal" type="checkbox"   value="02"      onclick="lxclick()">literal<b style="color:#4682B4">&nbsp;&nbsp;&nbsp;━━</b></input>
+                                    <br>
+                                    <input  id="lx_entity" type="checkbox"   value="03"      onclick="lxclick()">entity<b style="color:#2F4F4F">&nbsp;&nbsp;&nbsp;━━</b></input>
+
+                                    <!--<input  id="lxc" type="checkbox"   value="03"      onclick="lxclick()">3关系<b style="color:#32CD32">&nbsp;&nbsp;&nbsp;&nbsp;━━</b></input>-->
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+
+                    </span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="explore" class="divTab" style="display: none" >
+                <div class="containTab">
+                    <ul class="tabs">
+                        <!--<li id="current"><a href="#" title="tab1">TOP-K</a></li>-->
+                        <li  class="current"><a href="javascript:void(0);" onclick="getContent('explore',this)" title="class">class</a></li>
+                        <li ><a  href="javascript:void(0);" onclick="getContent('explore',this)" title="property">property</a></li>
+                        <li ><a href="javascript:void(0);" onclick="getContent('explore',this)" title="entity">entity</a></li>
+
+                    </ul>
+
+                    <div  class="content">
+                        <img src="/images/loadding.gif" style="margin-left: 50%;" id="exploreloading">
+
+
+                        <span id="class" style="display: block">
+                       <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card alert">
+                            <div class="card-header">
+                                <h4>Class</h4>
+                            </div>
+                            <div class="card-body"  style="height: 260px;overflow-y: auto">
+                                <div class="list-group needData" id="listClass"></div>
+
+
+
+                            </div>
+
+                        </div>
+
+
+
+
+
+                    </div>
+
+                    <div class="col-lg-6">
+
+                        <div class="panel panel-default m-t-15">
+                            <div class="panel-heading">properties of <span id="selectClass"></span></div>
+                            <div class="panel-body" style="overflow-y: scroll">
+<!--                                list of co-located properties in the dataset-->
+                                <div class="list-group" id="classResult"></div>
+
+
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+
+
+                </div>
+
+
+                    </span>
+
+                        <span id="property" style="display: none;">
+                        <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">description</div>
+                    <div class="panel-body">This is a dataset to describe ……</div>
+                </div>
+
+                        <div class="row">
+                    <div class="col-lg-4">
+                        <div class="panel panel-default m-t-15" >
+                            <div class="panel-heading">pattern list</div>
+                            <div class="panel-body">
+
+                                    <div>
+
+
+                                        <table class="table table-responsive">
+                                            <thead>
+
+                                            <tr style="display:block;">
+
+                                                <th style="width:20%;">pattern</th>
+                                                <th style="width:20%;text-align: left">count</th>
+
+                                            </tr>
+
+                                            </thead>
+
+                                            <tbody style="display:block;height:195px;overflow-y:scroll;" class="needData"></tbody>
+                                        </table>
+
+
+                                    </div>
+                                <!--</div>-->
+
+                            </div>
+                        </div>
+
+
+
+                    </div>
+
+                    <div class="col-lg-8">
+                        <div class="panel panel-default m-t-15">
+                            <div class="panel-heading">pattern graph</div>
+                            <div class="panel-body">
+                                <div class="col-lg-1">
+                                    <button class="btn-outline btn-rounded" onclick="nextOne(-1,'divEDP')" style="margin-top: 150px">back</button>
+
+                                </div>
+
+                                <div class="col-lg-10">
+
+                                </div>
+
+                                <div class="col-lg-1">
+                                    <button class="btn-outline btn-rounded" onclick="nextOne(1,'divEDP')" style="margin-top: 150px">next</button>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+
+
+                    </span>
+
+                        <span id="entity" style="display: none;">
+                        <div class="panel panel-default m-t-15">
+                    <div class="panel-heading">description</div>
+                    <div class="panel-body">This is a dataset to describe</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="panel panel-default m-t-15">
+                            <div class="panel-heading">pattern list</div>
+                            <div class="panel-body">
+                                <table class="table table-responsive">
+                                    <thead>
+
+                                    <tr style="display:block;">
+
+                                        <th style="width:20%;">pattern</th>
+                                        <th style="width:20%;text-align: left">count</th>
+
+                                    </tr>
+
+                                    </thead>
+
+                                    <tbody style="display:block;height:195px;overflow-y:scroll;" class="needData"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+
+                    <div class="col-lg-8">
+                        <div class="panel panel-default m-t-15">
+                            <div class="panel-heading">pattern graph</div>
+                            <div class="panel-body">
+                                <div class="col-lg-1">
+                                    <button class="btn-outline btn-rounded" onclick="nextOne(-1)">back</button>
+
+                                </div>
+
+                                <div class="col-lg-10">
+
+                                </div>
+
+                                <div class="col-lg-1">
+                                    <button class="btn-outline btn-rounded" onclick="nextOne(1)">next</button>
+
+                                </div>
+
+
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+
+
+                    </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="metadata" class="divTab" style="display: none" >
+                <div class="containTab">
+                    <ul class="tabs">
+                        <!--<li id="current"><a href="#" title="tab1">TOP-K</a></li>-->
+                        <li  class="current"><a href="javascript:void(0);" onclick="getContent('metadata',this)" title="basicinfo">basic info</a></li>
+                        <li ><a  href="javascript:void(0);" onclick="getContent('metadata',this)" title="resource">resource</a></li>
+                        <li ><a href="javascript:void(0);" onclick="getContent('metadata',this)" title="extra">extra</a></li>
+
+                    </ul>
+
+                    <div  class="content">
+                        <img src="/images/loadding.gif" style="margin-left: 50%;" id="metadataloading">
+
+
+                        <span id="basicinfo" style="display: none">
+                            <div class="panel panel-default m-t-15" >
+                            <div class="panel-heading">basic info</div>
+                            <div class="panel-body" style="height: 400px;overflow-y: auto">
+                                <table class="table table-responsive">
+                                    <thead>
+                                    <tr>
+
+                                        <th style="font-weight: bold">Feature</th>
+                                        <th style="text-align: left;font-weight: bold">Value</th>
+
+                                    </tr>
+                                    </thead>
+                                    <tbody class="needData" id="basicinfotBody"></tbody>
+                                </table>
+
+                            </div>
+                        </div>
+
+                        </span>
+
+                        <span id="resource" style="display: none;">
+                            <div class="panel panel-default m-t-15" >
+                            <div class="panel-heading">resources</div>
+                            <div class="panel-body needData" style="height:500px;overflow-y: auto" id="resourceID"></div>
+                        </div>
+                        </span>
+
+                        <span id="extra" style="display: none;">
+                            <div class="panel panel-default m-t-15" >
+                            <div class="panel-heading">extra</div>
+                            <div class="panel-body" style="height: 400px;overflow-y: auto">
+                                <table class="table table-responsive">
+                                    <thead>
+                                    <tr>
+
+                                        <th style="font-weight: bold;">Feature</th>
+                                        <th style="text-align: left;font-weight: bold;">Value</th>
+
+                                    </tr>
+                                    </thead>
+
+                                    <tbody class="needData" id="extraID"></tbody>
+                                </table>
+
+
+                            </div>
+                        </div>
+
+
+
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+
+
+
+
+        </div><!-- /# container-fluid -->
+    </div><!-- /# main -->
+</div><!-- /# content wrap -->
+
+<script th:inline="javascript">
+    window.onload = function () {
+        sessionStorage.setItem("session_id",[[${session_id}]])
+        sessionStorage.setItem("dataset_local_id",[[${dataset_local_id}]])
+    }
+
+    var tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .attr("visibility", "hidden");
+
+    var idx_simple_pattern
+    var idx_EDP
+    var idx_LP
+    var idx_ExpLOD
+
+    function changeBar(element){
+        $(".divTab").hide()
+
+        var changeTabText = $("#"+element+" .needData").html()
+        console.log(changeTabText)
+
+        if(changeTabText==''){
+            if(element==='patterns'){
+                $.ajax({
+                    type:"get",
+
+                    url:"/getPAnDA",
+                    data:{
+                        session_id:sessionStorage.getItem("session_id"),
+                        dataset_local_id:sessionStorage.getItem("dataset_local_id"),
+                    },
+                    contentType:"application/json; charset=utf-8",
+                    beforeSend:function(d){
+                        $("#patternsloading").show()
+                    },
+
+                    success:function (d){
+                        console.log(d)
+                        //设置sessionStorage，或者在Graph传值
+                        sessionStorage.setItem("divP",JSON.stringify(d))
+
+                            //添加形式不一样，有的是表格，有的是列表
+                            var innerText = ''
+                            for (var i=0;i<d.length;i++){
+                                innerText+='<tr >\n' +
+                                    ' <td \n' +
+                                    ' onclick=showGraph('+i+',"divP")' +
+                                    ' style="width:20%;cursor:pointer">'+d[i].name+'</td>\n' +
+                                    ' <td style="width:20%;text-align: left" >'+d[i].count+'</td>\n' +
+                                    ' </tr>'
+                            }
+                            console.log(innerText)
+                            $("#patternsloading").fadeOut()
+                            $('#PAnDA .needData').html(innerText)
+                            $("#PAnDA").fadeIn()
+                        idx_simple_pattern=0
+                        tmp = JSON.parse(sessionStorage.getItem("divP"))
+                        console.log(tmp)
+
+                        showCluster(tmp[idx_simple_pattern],"divP")
+
+                    },
+                    error:function (e){
+                        console.log(e)
+                    }
+                })
+
+            }
+            else if(element==='samples'){
+                $.ajax({
+                    type:"get",
+
+                    url:"/getTopK",
+                    data:{
+                        session_id:sessionStorage.getItem("session_id"),
+                        dataset_local_id:sessionStorage.getItem("ID"),
+                    },
+                    contentType:"application/json; charset=utf-8",
+
+                    beforeSend:function(d){
+                        $("#samplesloading").show()
+
+
+                    },
+
+                    success:function (d){
+                        console.log(d)
+                        var innerText = ''
+                        for (var i=0;i<d[0].length;i++){
+                            innerText+='<tr >\n' +
+                                '<td  style="font-weight: bold;">'+d[0][i].entity+'</td>\n' +
+                                '<td style="text-align: left" >'+d[0][i].count+'</td>\n' +
+                                '</tr>'
+                        }
+                        $("#samplesloading").fadeOut()
+
+                        $('#inDegreeData').html(innerText)
+
+                        var outDegreeData = ''
+                        for (var i=0;i<d[1].length;i++){
+                            outDegreeData+='<tr >\n' +
+                                '<td  style="font-weight: bold;">'+d[1][i].entity+'</td>\n' +
+                                '<td style="text-align: left" >'+d[1][i].count+'</td>\n' +
+                                '</tr>'
+                        }
+                        $('#outDegreeData').html(outDegreeData)
+                        $('#TopK').fadeIn()
+                    },
+                    error:function (e){
+                        console.log(e)
+                    }
+                })
+
+            }
+            else if(element==='explore'){
+                $.ajax({
+                    type:"get",
+
+                    url:"/getExploreClass",
+                    data:{
+                        session_id:sessionStorage.getItem("session_id"),
+                        dataset_local_id:sessionStorage.getItem("ID"),
+                    },
+                    contentType:"application/json; charset=utf-8",
+
+                    success:function (d){
+                        console.log(d)
+
+
+                    },
+                    error:function (e){
+                        console.log(e)
+                    }
+                })
+
+            }
+            else if(element==='metadata'){
+                $.ajax({
+                    type:"get",
+
+                    url:"/getBasicInfo",
+                    data:{
+                        session_id:sessionStorage.getItem("session_id"),
+                        dataset_local_id:sessionStorage.getItem("dataset_local_id"),
+                    },
+                    contentType:"application/json; charset=utf-8",
+                    beforeSend:function(d){
+                        $("#metadataloading").show()
+                    },
+
+                    success:function (d){
+                        console.log(d)
+                        var innerText = '<tr>\n' +
+                            '                                        <td style="font-weight: bold">Name</td>\n' +
+                            '                                        <td style="text-align: left">'+d.name+'</td>\n' +
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr>\n' +
+                            '                                        <td style="font-weight: bold;">Metadata_created</td>\n' +
+                            '                                        <td style="text-align: left" >'+d.metadata_created+'</td>\n' +
+                            '                                        <!--<td style="text-align: left" th:case="null">111</td>-->\n' +
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr>\n' +
+                            '                                        <td style="font-weight: bold;">Metadata_modified</td>\n' +
+                            '                                        <td style="text-align: left" >'+d.metadata_modified+'</td>\n' +
+                            '                                        <!--<td style="text-align: left" th:case="null" >1111</td>-->\n' +
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr >\n' +
+                            '                                        <td style="font-weight: bold;">Author</td>\n' +
+                            '                                        <td style="text-align: left" th:case="false" >'+d.author+'</td>\n' +
+
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr >\n' +
+                            '                                        <td style="font-weight: bold;">Author_email</td>\n' +
+                            '                                        <td style="text-align: left" \n' +
+                            '                                            >'+d.author_email+'</td>\n' +
+
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr >\n' +
+                            '                                        <td style="font-weight: bold;">Maintainer</td>\n' +
+                            '                                        <td style="text-align: left" \n' +
+                            '                                            >'+d.maintainer+'</td>\n' +
+
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr >\n' +
+                            '                                        <td style="font-weight: bold;">Maintainer_email</td>\n' +
+                            '                                        <td style="text-align: left" \n' +
+                            '                                            >'+d.maintainer_email+'</td>\n' +
+
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr >\n' +
+                            '                                        <td style="font-weight: bold;">Organization</td>\n' +
+                            '                                        <td style="text-align: left" \n' +
+                            '                                            >'+d.org_title+'</td>\n' +
+
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr >\n' +
+                            '                                        <td style="font-weight: bold;">License</td>\n' +
+                            '                                        <td style="text-align: left"  >'+d.license+'</td>\n' +
+
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr >\n' +
+                            '                                        <td style="font-weight: bold;">State</td>\n' +
+                            '                                        <td style="text-align: left" >'+d.state+'</td>\n' +
+
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr >\n' +
+                            '                                        <td style="font-weight: bold;">Version</td>\n' +
+                            '                                        <td style="text-align: left" >'+d.version+'</td>\n' +
+
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr>\n' +
+                            '                                        <td style="font-weight: bold;">Creator_user_id</td>\n' +
+                            '                                        <td style="text-align: left" >'+d.creator_user_id+'</td>\n' +
+                            '                                        <!--<td style="text-align: left" th:case="null"></td>-->\n' +
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr>\n' +
+                            '                                        <td style="font-weight: bold;">Metadata_license_id</td>\n' +
+                            '                                        <td style="text-align: left" >'+d.license_id+'</td>\n' +
+                            '                                        <!--<td style="text-align: left" th:case="null"></td>-->\n' +
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr>\n' +
+                            '                                        <td style="font-weight: bold;">Metadata_revision_id</td>\n' +
+                            '                                        <td style="text-align: left" >'+d.revision_id+'</td>\n' +
+                            '                                        <!--<td style="text-align: left" th:case="null"></td>-->\n' +
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr>\n' +
+                            '                                        <td style="font-weight: bold;">Metadata_org_description</td>\n' +
+                            '                                        <td style="text-align: left" >'+d.org_description+'</td>\n' +
+                            '                                        <!--<td style="text-align: left" th:case="null"></td>-->\n' +
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr>\n' +
+                            '                                        <td style="font-weight: bold;">Metadata_org_created</td>\n' +
+                            '                                        <td style="text-align: left" >'+d.org_created+'</td>\n' +
+                            '                                        <!--<td style="text-align: left" th:case="null"></td>-->\n' +
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr>\n' +
+                            '                                        <td style="font-weight: bold;">Metadata_org_image_url</td>\n' +
+                            '                                        <td style="text-align: left" >'+d.org_image_url+'</td>\n' +
+                            '                                        <!--<td style="text-align: left" th:case="null"></td>-->\n' +
+                            '                                    </tr>\n' +
+                            '                                    <tr>\n' +
+                            '                                        <td style="font-weight: bold;">Metadata_org_state</td>\n' +
+                            '                                        <td style="text-align: left" >'+d.org_state+'</td>\n' +
+                            '                                        <!--<td style="text-align: left" th:case="null"></td>-->\n' +
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr>\n' +
+                            '                                        <td style="font-weight: bold;">Metadata_org_revision_id</td>\n' +
+                            '                                        <td style="text-align: left" >'+d.org_revision_id+'</td>\n' +
+                            '                                        <!--<td style="text-align: left" th:case="null"></td>-->\n' +
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr>\n' +
+                            '                                        <td style="font-weight: bold;">Metadata_approval_status</td>\n' +
+                            '                                        <td style="text-align: left" >'+d.org_approval_status+'</td>\n' +
+                            '                                        <!--<td style="text-align: left" th:case="null"></td>-->\n' +
+                            '                                    </tr>\n' +
+                            '\n' +
+                            '                                    <tr>\n' +
+                            '                                        <td style="font-weight: bold;">Metadata_num_tags</td>\n' +
+                            '                                        <td style="text-align: left">'+d.num_tags+'</td>\n' +
+                            '                                        <!--<td style="text-align: left" th:case="null"></td>-->\n' +
+                            '                                    </tr>'
+
+                        $("#metadataloading").fadeOut();
+
+
+                        $("#basicinfotBody").html(innerText);
+                        $("#basicinfo").fadeIn()
+
+
+
+                    },
+                    error:function (e){
+                        console.log(e)
+                    }
+                })
+            }
+            $("#"+element).fadeIn()
+
+        }else{
+            $("#"+element).fadeIn()
+        }
+
+    }
+
+    function getContent(parent,element){
+        console.log(element)
+
+        $("#"+parent+" .content span").hide(); //Hide all content
+
+        $("#"+parent+" .tabs li").attr("class", ""); //Reset id's
+        $(element).parent().attr("class", "current"); // Activate this
+        console.log($(element).parent())
+
+
+
+        //直接设置一个全局bool变量即可
+        var tBodyText = $('#' + $(element).attr('title')+' .needData').html()
+        console.log(tBodyText)
+
+
+        if(tBodyText== '' ){
+            console.log("nullnull")
+            //向后台发消息
+            $.ajax({
+                type:"get",
+                async:false,
+                url:"/get"+$(element).attr('title'),
+                data:{
+                    session_id:sessionStorage.getItem("session_id"),
+                    dataset_local_id:sessionStorage.getItem("dataset_local_id"),
+                },
+                contentType:"application/json; charset=utf-8",
+
+                success:function (d){
+                    console.log(d)
+                    if($(element).attr('title')=="namespace"){
+                        //添加形式不一样，有的是表格，有的是列表
+                        var innerText = ''
+                        for (var i=0;i<d.length;i++){
+                            innerText+=' <tr>\n' +
+                                '<td style="font-weight: bold" >'+d[i].vocab+'</td>\n' +
+                                '<td style="text-align: left" >'+d[i].prefix+'</td>\n' +
+                                '</tr>'
+                        }
+                        $('#' + $(element).attr('title')+' .needData').html(innerText)
+                    }
+                    else if($(element).attr('title')=="PAnDA"){
+                        //添加形式不一样，有的是表格，有的是列表
+                        var innerText = ''
+                        for (var i=0;i<d.length;i++){
+                            innerText+='<tr >\n' +
+                                ' <td \n' +
+                                ' onclick=showGraph('+i+',"divP")' +
+                                ' style="width:20%;cursor:pointer">'+d[i].name+'</td>\n' +
+                                ' <td style="width:20%;text-align: left" >'+d[i].count+'</td>\n' +
+                                ' </tr>'
+                        }
+                        console.log(innerText)
+                        $('#' + $(element).attr('title')+' .needData').html(innerText)
+                    }
+                    else if($(element).attr('title')=="EDP"){
+                        var innerText = ''
+                        for (var i=0;i<d.length;i++){
+                            innerText+='<tr >\n' +
+                                ' <td \n' +
+                                ' onclick=showGraph('+i+',"divEDP")' +
+                                ' style="width:20%;cursor:pointer">'+d[i].name+'</td>\n' +
+                                ' <td style="width:20%;text-align: left" >'+d[i].count+'</td>\n' +
+                                ' </tr>'
+                        }
+
+                        $('#' + $(element).attr('title')+' .needData').html(innerText)
+                        sessionStorage.setItem("divEDP",JSON.stringify(d))
+                        idx_EDP=0
+                        showCluster(d[0],"divEDP")
+                    }
+                    else if($(element).attr('title')=="LP"){
+                        var innerText = ''
+                        for (var i=0;i<d.length;i++){
+                            innerText+='<tr >\n' +
+                                ' <td \n' +
+                                ' onclick=showGraph('+i+',"divLP")' +
+                                ' style="width:20%;cursor:pointer">'+d[i].name+'</td>\n' +
+                                ' <td style="width:20%;text-align: left" >'+d[i].count+'</td>\n' +
+                                ' </tr>'
+                        }
+
+                        $('#' + $(element).attr('title')+' .needData').html(innerText)
+                        sessionStorage.setItem("divLP",JSON.stringify(d))
+                        idx_LP=0
+                        showCluster2(d[0].onePattern,d[0].twoPattern,d[0].property,"divLP")
+                    }
+                    else if($(element).attr('title')=="ExpLOD"){
+
+                        sessionStorage.setItem("ExpLOD",JSON.stringify(d))
+                        idx_ExpLOD=0
+                        showTree(d[0],"","#containerExpLOD")
+                    }
+                    else if($(element).attr('title')=="HITS"){
+                        var innerText = ''
+                        for (var i=0;i<d[0].length;i++){
+                            innerText+='<tr>\n' +
+                                '<td style="font-weight: bold;">'+d[0][i].entity+'</td>\n' +
+                                '<td style="text-align: left;" >'+d[0][i].hub+'</td>\n' +
+                                '</tr>'
+                        }
+                        $('#hubData').html(innerText)
+
+                        var innerText2 = ''
+                        for (var i=0;i<d[1].length;i++){
+                            innerText2+='<tr>\n' +
+                                '<td style="font-weight: bold;">'+d[1][i].entity+'</td>\n' +
+                                '<td style="text-align: left;" >'+d[1][i].authority+'</td>\n' +
+                                '</tr>'
+                        }
+                        $('#authorityData').html(innerText2)
+
+
+                    }
+                    else if($(element).attr('title')=="PageRank"){
+                        var innerText=''
+                        for(var i=0;i<d.length;i++){
+                            innerText+='<tr>\n' +
+                                ' <td  style="font-weight: bold;">'+d[i].entity+'</td>\n' +
+                                ' <td style="text-align: left;" >'+d[i].score+'</td>\n' +
+                                '</tr>'
+                        }
+                        $('#' + $(element).attr('title')+' .needData').html(innerText)
+
+
+                    }
+                    else if($(element).attr('title')=="TripleRank"){
+                        var innerText = ''
+                        for(var i=0;i<d.length;i++){
+                            innerText+='<div class="row" >\n' +
+                                '                                    <div class="col-lg-6">\n' +
+                                '                                        <table class="table table-responsive" >\n' +
+                                '                                            <thead >\n' +
+                                '                                            <tr style="display:block;">\n' +
+                                '\n' +
+                                '                                                <th style="width:20%;font-weight: bold">Score</th>\n' +
+                                '                                                <th style="width:20%;text-align: left;font-weight: bold">Entity</th>\n' +
+                                '\n' +
+                                '                                            </tr>\n' +
+                                '                                            </thead>\n' +
+                                '\n' +
+                                '                                            <tbody  style="height: 400px;width:450px;overflow: auto;display:block">\n'
+                                for (var j=0;j<d[i][0].length;j++){
+                                    innerText+='                                            <tr >\n' +
+                                        '                                                <td style="width:20%;text-align: left;font-weight: bold" >'+d[i][0][j].score+'</td>\n' +
+                                        '                                                <td style="width:20%;text-align: left" >'+d[i][0][j].entity+'</td>\n' +
+                                        '\n' +
+                                        '                                            </tr>\n'
+                                }
+
+                            innerText+='\n' +
+                                '                                            </tbody>\n' +
+                                '                                        </table>\n' +
+                                '                                    </div>\n' +
+                                '\n' +
+                                '\n' +
+                                '                                    <div class="col-lg-6">\n' +
+                                '\n' +
+                                '                                        <table class="table table-responsive">\n' +
+                                '                                            <thead>\n' +
+                                '                                            <tr style="display:block;">\n' +
+                                '\n' +
+                                '\n' +
+                                '                                                <th style="width:20%;text-align: left;font-weight: bold">Score</th>\n' +
+                                '                                                <th style="width:20%;text-align: left;font-weight: bold">Predicate</th>\n' +
+                                '                                            </tr>\n' +
+                                '                                            </thead>\n' +
+                                '\n' +
+                                '                                            <tbody  style="height: 400px;width:450px;overflow: auto;display:block">\n'
+                                for(var j=0;j<d[i][1].length;j++){
+                                    innerText+='                                            <tr th:each="rel:${tt[1]}">\n' +
+                                        '\n' +
+                                        '\n' +
+                                        '                                                <td style="width:20%;text-align: left;font-weight: bold" >'+d[i][1][j].score+'</td>\n' +
+                                        '                                                <td style="width:20%;text-align: left">'+d[i][1][j].relation+'</td>\n' +
+                                        '                                            </tr>\n'
+                                }
+                        innerText+=        '\n' +
+                                '                                            </tbody>\n' +
+                                '                                        </table>\n' +
+                                '\n' +
+                                '                                    </div>\n' +
+                                '\n' +
+                                '                                </div>'
+                        }
+
+                        $('#' + $(element).attr('title')+' .needData').html(innerText)
+
+
+                    }
+                    else if($(element).attr('title')=="ROCKER"){
+                        var innerText = ''
+                        for(var i=0;i<d.length;i++){
+                            innerText+='<div class="panel panel-default m-t-15" >\n' +
+                                '                    <div class="panel-heading" >'+d[i].class+'</div>\n' +
+                                '                    <div class="panel-body" style="height: 400px;overflow-y: auto">\n' +
+                                '\n' +
+                                '\n' +
+                                '                        <table class="table table-responsive table-condensed"  border="1" frame="void" rules="cols" bordercolor="#ddd">\n' +
+                                '                            <thead >\n' +
+                                '                            <tr >\n' +
+                                '\n' +
+                                '                                <th style="font-weight: bold;">property</th>\n' +
+                                '                                <th style="text-align: left;font-weight: bold;">score</th>\n' +
+                                '\n' +
+                                '                            </tr>\n' +
+                                '\n' +
+                                '                            </thead>\n' +
+                                '\n' +
+                                '\n'
+                                for(var j=0;j<d[i].list.length;j++){
+                                    innerText+='                            <tbody >\n' +
+                                    '                            <tr>\n' +
+                                    '                                <td style="font-weight: bold;">'+d[i].list[j].oneProperty+'</td>\n' +
+                                    '                                <td style="text-align: left;vertical-align: middle;" rowspan="'+d[i].list[j].count+'">'+d[i].list[j].score+'</td>\n' +
+                                    '                            </tr>\n' +
+                                    '\n' +
+                                    '\n' +
+                                    '\n'
+                                    if(d[i].list[j].property!=null){
+                                        for(var k=0;k<d[i].list[j].property.length;k++){
+                                            innerText+='                            <tr >\n' +
+                                                '                                <td th:text="${pp}" style="font-weight: bold;text-align: left">'+d[i].list[j].property[k]+'</td>\n' +
+                                                '<!--                                <td style="text-align: left" th:text="${key.}" th:rowspan=""></td>-->\n' +
+                                                '                            </tr>\n'
+                                        }
+                                    }
+
+                                    innerText+='\n' +
+                                    '\n' +
+                                    '\n' +
+                                    '                            </tbody>\n'
+                                }
+                                innerText+='                        </table>\n' +
+                                '\n' +
+                                '\n' +
+                                '                    </div>\n' +
+                                '                </div>'
+                        }
+                        $('#' + $(element).attr('title')+' .needData').html(innerText)
+
+                    }
+                    else if($(element).attr('title')=="Illustrative"){
+                        if(d[0].length == 0){
+                            document.getElementById("noIll").style.display="";
+                        }else{
+
+
+                            var options = {}
+                            options.width = 1558
+                            options.height = 600
+                            options.flag = true
+
+                            showSnippet(d[0],d[1],"illSnippet",tooltip,options)
+                        }
+
+
+
+                    }
+                    else if($(element).attr('title')=="resource"){
+                        var innerText=''
+                        for(var i=0;i<d.length;i++){
+                            innerText+='<table class="table table-responsive" >\n' +
+                                '                                    <thead>\n' +
+                                '                                    <tr>\n' +
+                                '\n' +
+                                '                                        <th style="font-weight: bold;">Feature</th>\n' +
+                                '                                        <th style="text-align: left;font-weight: bold;">Value</th>\n' +
+                                '\n' +
+                                '                                    </tr>\n' +
+                                '                                    </thead>\n' +
+                                '                                    <tbody>\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">mimetype</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].mimetype+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">cache_url</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].cache_url+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">hash</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].hash+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">description</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].description+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">name</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].name+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">format</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].format+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">url</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].url+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">cache_last_updated</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].cache_last_updated+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">package_id</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].package_id+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">created</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].created+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">state</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].state+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">minetype_inner</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].mimetype_inner+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">last_modified</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].last_modified+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">position</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].position+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">revision_id</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].revision_id+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">url_type</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].url_type+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">resource_type</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].resource_type+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">downloaded</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].downloaded+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '\n' +
+                                '                                    <tr>\n' +
+                                '                                        <td style="font-weight: bold;">data_source</td>\n' +
+                                '                                        <td style="text-align: left" >'+d[i].data_source+'</td>\n' +
+                                '                                    </tr>\n' +
+                                '\n' +
+                                '\n' +
+                                '                                    </tbody>\n' +
+                                '                                </table>'
+                        }
+
+                        $("#resourceID").html(innerText);
+
+
+                    }
+                    else if($(element).attr('title')=="extra"){
+                        var innerText = '';
+                        for(var i=0;i<d.length;i++){
+                            innerText+='<tr >\n' +
+                                '<td  style="font-weight: bold;">'+d[i].id+'</td>\n' +
+                                '<td style="text-align: left" >'+d[i].value+'</td>\n' +
+                                '</tr>'
+                        }
+                        $("#extraID").html(innerText);
+                    }
+
+
+
+                },
+                error:function (e){
+                    console.log(e)
+                }
+            })
+            $('#' + $(element).attr('title')).fadeIn(); // Show content for current tab
+
+        }else{
+            console.log("not null")
+            $('#' + $(element).attr('title')).fadeIn(); // Show content for current tab
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+    function nextOne(backOrforward,type){
+        var tmp = JSON.parse(sessionStorage.getItem(type))
+        if(type==='divP'){
+            if(idx_simple_pattern===0 && backOrforward===-1){
+                alert("The first one!")
+                return
+            }else if(idx_simple_pattern===tmp.length-1 && backOrforward===1){
+                alert("The last one!")
+                return
+            }else{
+                idx_simple_pattern+=backOrforward
+
+                $("#divP").html("")
+                console.log("idx_simple_pattern:"+idx_simple_pattern)
+
+                showCluster(tmp[idx_simple_pattern],"divP")
+                // showTree(dataset[idx],"1111","#container")
+                // showExpLOD()
+            }
+        }
+        else if(type==='divEDP'){
+            if(idx_EDP===0 && backOrforward===-1){
+                alert("The first one!")
+                return
+            }else if(idx_EDP===tmp.length-1 && backOrforward===1){
+                alert("The last one!")
+                return
+            }else{
+                idx_EDP+=backOrforward
+
+                $("#divEDP").html("")
+                console.log("idx_EDP:"+idx_EDP)
+
+                showCluster(tmp[idx_EDP],"divEDP")
+
+            }
+        }
+        else if(type==='divLP'){
+            if(idx_LP===0 && backOrforward===-1){
+                alert("The first one!")
+                return
+            }else if(idx_LP===tmp.length-1 && backOrforward===1){
+                alert("The last one!")
+                return
+            }else{
+                idx_LP+=backOrforward
+
+                $("#divLP").html("")
+                console.log("idx_LP:"+idx_LP)
+
+
+                showCluster2(tmp[idx_LP].onePattern,tmp[idx_LP].twoPattern,tmp[idx_LP].property,"divLP")
+            }
+        }
+        else if(type==='ExpLOD'){
+            if(idx_ExpLOD===0 && backOrforward===-1){
+                alert("The first one!")
+                return
+            }else if(idx_ExpLOD===tmp.length-1 && backOrforward===1){
+                alert("The last one!")
+                return
+            }else{
+                idx_ExpLOD+=backOrforward
+                $("#containerExpLOD").html("")
+                showTree(tmp[idx_ExpLOD],"","#containerExpLOD")
+            }
+        }
+
+    }
+
+    //TODO
+    function showGraph(d,divID){
+
+        $("#"+divID).html("")
+        //这里要修改idx，形成联动
+        if(divID==='divP'){
+            idx_simple_pattern = d
+            showCluster(JSON.parse(sessionStorage.getItem(divID))[d],divID)
+        }else if(divID==='divEDP'){
+            idx_EDP = d
+            showCluster(JSON.parse(sessionStorage.getItem(divID))[d],divID)
+        }else if(divID==='divLP'){
+            idx_LP = d
+            var tmp = JSON.parse(sessionStorage.getItem(divID))
+            showCluster2(tmp[d].onePattern,tmp[d].twoPattern,tmp[d].property,divID)
+        }
+
+
+    }
+
+
+
+</script>
+
+
+
+
+
+<script src="/js/lib/jquery.min.js"></script><!-- jquery vendor -->
+<script src="/js/lib/jquery.nanoscroller.min.js"></script><!-- nano scroller -->
+<script src="/js/lib/sidebar.js"></script><!-- sidebar -->
+<script src="/js/lib/bootstrap.min.js"></script><!-- bootstrap -->
+<script src="/js/scripts.js"></script>
+<script src="/js/lib/tabulous.js"></script>
+</body>
