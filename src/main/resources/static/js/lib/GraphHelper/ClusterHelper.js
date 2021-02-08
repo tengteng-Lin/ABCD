@@ -80,19 +80,6 @@ function showCluster(data,divID) {
     var nodes = cluster.nodes(data);
     var links = cluster.links(nodes);
 
-    console.log(nodes)
-    console.log(links)
-
-    // for(i=0;i<links.length;i++){
-    //     if(links[i].target.inOrOut===0){
-    //         console.log("swap……")
-    //         c=links[i].source
-    //         links[i].source = links[i].target
-    //         links[i].target = c
-    //
-    //     }
-    // }
-    // console.log(links)
 
     var node = svg.selectAll(".node")
         .data(nodes)
@@ -134,25 +121,10 @@ function showCluster(data,divID) {
                     .attr("refX", function () {
                         return 6
 
-                        // if(dd.source.inOrOut===0){
-                        //
-                        //     return 18;
-                        // }else{
-                        //     return 9;
-                        // }
-
-
                     })
                     .attr("refY", 6)
                     .attr("orient", function () {
                         return "auto"
-
-                        // if(dd.target.inOrOut===0){
-                        //     return "180";
-                        // }else{
-                        //     return "auto";
-                        // }
-
 
                     })
                     .append("svg:path")
@@ -194,14 +166,6 @@ function showCluster(data,divID) {
                     .attr("viewBox", "0 0 12 12")
                     .attr("refX", function () {
                         return 9
-
-                        // if(dd.source.inOrOut===0){
-                        //
-                        //     return 18;
-                        // }else{
-                        //     return 9;
-                        // }
-
 
                     })
                     .attr("refY", 6)

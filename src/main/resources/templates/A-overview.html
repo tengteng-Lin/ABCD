@@ -30,7 +30,7 @@
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="../static/js/lib/GraphHelper/ScatterHelper.js"></script>
     <script src="../static/js/lib/GraphHelper/PieHelper.js"></script>
-    <script src="../static/js/lib/GraphHelper/ClusterHelper2.js"></script>
+    <script src="../static/js/lib/GraphHelper/ClusterHelper3.js"></script>
     <script src="../static/js/lib/GraphHelper/ClusterHelper.js"></script>
     <script src="../static/js/lib/GraphHelper/TreeHelper.js"></script>
     <script src="../static/js/lib/GraphHelper/D3Helper.js"></script>
@@ -55,7 +55,7 @@
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="/js/lib/GraphHelper/ScatterHelper.js"></script>
     <script src="/js/lib/GraphHelper/PieHelper.js"></script>
-    <script src="js/lib/GraphHelper/ClusterHelper2.js"></script>
+    <script src="js/lib/GraphHelper/ClusterHelper3.js"></script>
     <script src="js/lib/GraphHelper/ClusterHelper.js"></script>
     <script src="js/lib/GraphHelper/TreeHelper.js"></script>
     <script src="js/lib/GraphHelper/D3Helper.js"></script>
@@ -1420,7 +1420,7 @@
                         $('#' + $(element).attr('title')+' .needData').html(innerText)
                         sessionStorage.setItem("divLP",JSON.stringify(d))
                         idx_LP=0
-                        showCluster2(d[0].onePattern,d[0].twoPattern,d[0].property,"divLP")
+                        showCluster3(d[0].onePattern,d[0].twoPattern,d[0].property,"divLP")
                     }
                     else if($(element).attr('title')=="ExpLOD"){
 
@@ -1785,7 +1785,7 @@
                 console.log("idx_LP:"+idx_LP)
 
 
-                showCluster2(tmp[idx_LP].onePattern,tmp[idx_LP].twoPattern,tmp[idx_LP].property,"divLP")
+                showCluster3(tmp[idx_LP].onePattern,tmp[idx_LP].twoPattern,tmp[idx_LP].property,"divLP")
             }
         }
         else if(type==='ExpLOD'){
@@ -1818,7 +1818,7 @@
         }else if(divID==='divLP'){
             idx_LP = d
             var tmp = JSON.parse(sessionStorage.getItem(divID))
-            showCluster2(tmp[d].onePattern,tmp[d].twoPattern,tmp[d].property,divID)
+            showCluster3(tmp[d].onePattern,tmp[d].twoPattern,tmp[d].property,divID)
         }
 
 
