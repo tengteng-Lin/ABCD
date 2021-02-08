@@ -501,6 +501,7 @@ public class Session {
                 }catch(Exception e)    {
                     e.printStackTrace();
                 }
+                System.out.println(edpPatterns);
                 logger.info("EDPPattern end!");
                 booledpPatterns.set(true);
                 booledpPatterns.notify();

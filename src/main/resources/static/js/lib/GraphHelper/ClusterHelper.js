@@ -83,16 +83,34 @@ function showCluster(data,divID) {
     console.log(nodes)
     console.log(links)
 
-    for(i=0;i<links.length;i++){
-        if(links[i].target.inOrOut===0){
-            console.log("swap……")
-            c=links[i].source
-            links[i].source = links[i].target
-            links[i].target = c
+    // for(i=0;i<links.length;i++){
+    //     if(links[i].target.inOrOut===0){
+    //         console.log("swap……")
+    //         c=links[i].source
+    //         links[i].source = links[i].target
+    //         links[i].target = c
+    //
+    //     }
+    // }
+    // console.log(links)
 
-        }
-    }
-    console.log(links)
+    var node = svg.selectAll(".node")
+        .data(nodes)
+        .enter()
+        .append("g")
+        .attr("class", function (d,i) {
+            if(i===0){
+                return "root"
+            }
+            else return "node"
+        })
+        .attr("transform", function(d) {
+            return "translate(" + d.y + "," + d.x + ")";
+        })
+
+    var root = svg.selectAll(".root")
+        .append("circle")
+        .attr("r", 8.5);
 
 
 
@@ -101,30 +119,33 @@ function showCluster(data,divID) {
         .enter()
         .append("path")
         .attr("class", "link")
-        .attr("marker-end", function (dd, i) {
+        .attr("marker-start",function (dd,i) {
+            console.log("marker-start:")
+            console.log(dd)
+            if(dd.target.inOrOut===0) {
 
-            var arrowMarker = svg.append("marker")
+                var arrowMarker = svg.append("marker")
 
-                .attr("id", "arrow" +  i)
-                .attr("markerUnits", "userSpaceOnUse")
-                .attr("markerWidth", "16")
-                .attr("markerHeight", "15")
-                .attr("viewBox", "0 0 12 12")
-                .attr("refX", function () {
-                    // return 9
+                    .attr("id", "arrow_start" +divID+  i)
+                    .attr("markerUnits", "userSpaceOnUse")
+                    .attr("markerWidth", "16")
+                    .attr("markerHeight", "15")
+                    .attr("viewBox", "0 0 12 12")
+                    .attr("refX", function () {
+                        return 6
 
-                        if(dd.source.inOrOut===0){
+                        // if(dd.source.inOrOut===0){
+                        //
+                        //     return 18;
+                        // }else{
+                        //     return 9;
+                        // }
 
-                            return 18;
-                        }else{
-                            return 9;
-                        }
 
-
-                })
-                .attr("refY", 6)
-                .attr("orient", function () {
-                    return "auto"
+                    })
+                    .attr("refY", 6)
+                    .attr("orient", function () {
+                        return "auto"
 
                         // if(dd.target.inOrOut===0){
                         //     return "180";
@@ -133,23 +154,84 @@ function showCluster(data,divID) {
                         // }
 
 
-                })
-                .append("svg:path")
-                .attr("d", "M2,2 L10,6 L2,10 L6,6 L2,2")
-                .attr("fill", function () {
-                    if (dd.target.type===0 || dd.source.type===0){
-                        if(dd.target.inOrOut===0 || dd.source.inOrOut===0){
-                            return lineColor_2
+                    })
+                    .append("svg:path")
+                    .attr("d", "M10,2 L6,6 L10,10 L2,6 L10,2")
+                    .attr("fill", function () {
+                        if (dd.target.type===0 || dd.source.type===0){
+                            if(dd.target.inOrOut===0 || dd.source.inOrOut===0){
+                                return lineColor_2
+                            }else{
+                                return lineColor_0
+                            }
+
                         }else{
-                            return lineColor_0
+                            return lineColor_1
                         }
+                    });
 
-                    }else{
-                        return lineColor_1
-                    }
-                });
+                return "url(#arrow_start" +divID+  i + ")";
+            }
+            else return;
 
-            return "url(#arrow" +  i + ")";
+
+        })
+        .attr("marker-end", function (dd, i) {
+            console.log("marker-end:")
+            console.log(dd)
+
+            if(dd.target.inOrOut===0) {
+                return;
+
+            }
+            else{
+                var arrowMarker = svg.append("marker")
+
+                    .attr("id", "arrow" + divID+ i)
+                    .attr("markerUnits", "userSpaceOnUse")
+                    .attr("markerWidth", "16")
+                    .attr("markerHeight", "15")
+                    .attr("viewBox", "0 0 12 12")
+                    .attr("refX", function () {
+                        return 9
+
+                        // if(dd.source.inOrOut===0){
+                        //
+                        //     return 18;
+                        // }else{
+                        //     return 9;
+                        // }
+
+
+                    })
+                    .attr("refY", 6)
+                    .attr("orient", function () {
+                        return "auto"
+
+
+
+
+                    })
+                    .append("svg:path")
+                    .attr("d", "M2,2 L10,6 L2,10 L6,6 L2,2")
+                    .attr("fill", function () {
+                        if (dd.target.type===0 || dd.source.type===0){
+                            if(dd.target.inOrOut===0 || dd.source.inOrOut===0){
+                                return lineColor_2
+                            }else{
+                                return lineColor_0
+                            }
+
+                        }else{
+                            return lineColor_1
+                        }
+                    });
+
+                return "url(#arrow" + divID+ i + ")";
+
+            }
+
+
         })
 
         .attr("stroke",function (d){
@@ -170,24 +252,9 @@ function showCluster(data,divID) {
         })
         .attr("d", diagonal);
 
-    var node = svg.selectAll(".node")
-        .data(nodes)
-        .enter()
-        .append("g")
-        .attr("class", function (d,i) {
-            if(i===0){
-                return "root"
-            }
-            else return "node"
-        })
-        
-        .attr("transform", function(d) {
-            return "translate(" + d.y + "," + d.x + ")";
-        })
 
-    var root = svg.selectAll(".root")
-        .append("circle")
-        .attr("r", 8.5);
+
+
 
 
 
@@ -200,7 +267,7 @@ function showCluster(data,divID) {
             return d.children ? "end" : "start";
         })
         .text(function(d) {
-            console.log(d)
+
 
             // return d.children ? "" : d.name;
             return d.name;
