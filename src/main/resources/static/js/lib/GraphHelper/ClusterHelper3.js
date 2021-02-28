@@ -1,5 +1,5 @@
 
-function showCluster3(data,data1,property,divID) {
+function showCluster3(data,data1,property,divID,title) {
     //定义legend
     legendProperty = [{
         "name":"out property",
@@ -451,6 +451,16 @@ function showCluster3(data,data1,property,divID) {
     arrowMarker.append("path")
         .attr("d",arrow_path)
         .attr("fill","#000");
+
+    svg.append("text")
+        .attr("x", (width / 2))
+        .attr("y", height-50)
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+
+        .text(
+            title
+        );
 
 
 

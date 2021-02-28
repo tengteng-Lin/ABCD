@@ -147,7 +147,7 @@
 
             <ul>
 
-                <li class="active"><a href="javascript:void(0);" onclick="changeBar('overview')"> Overview </a></li>
+                <li class="active"><a href="javascript:void(0);" onclick="changeBar('classANDproperty')"> classANDproperty </a></li>
                 <li><a href="javascript:void(0);" onclick="changeBar('patterns')"> Data Patterns </a></li>
                 <!--<li><a href="javascript:void(0);" onclick="changeBar('samples')"> Data Samples </a></li>-->
                 <!--<li><a href="javascript:void(0);" onclick="changeBar('explore')"> Explore </a></li>-->
@@ -210,7 +210,7 @@
 
 
 
-            <div id="overview" class="divTab" style="z-index: 1">
+            <div id="classANDproperty" class="divTab" style="z-index: 1">
                 <div id="containTab" class="containTab">
                     <ul id="tabs" class="tabs">
                         <li  class="current"><a  href="javascript:void(0);" onclick="getContent('overview',this)" title="statistics">statistics</a></li>
@@ -223,7 +223,7 @@
                         <div class="panel panel-default m-t-15">
                 <div class="panel-heading">Class</div>
                 <div class="panel-body">
-                    <table class="table table-responsive table-hover ">
+                    <table class="table table-responsive table-hover needData">
                                 <thead>
                                 <tr style="display:block">
 
@@ -237,9 +237,9 @@
 
                                 <tr style="width:20%;cursor:pointer" th:each="r,rStat: ${statistics.classDis}">
 
-                                    <td style="text-align: left;" th:text="${r.uri}"></td>
-                                    <td style="text-align: left;" th:text="${r.name}"></td>
-                                    <td style="text-align: left;" th:text="${r.value}"></td>
+                                    <td style="width:20%;text-align: left;" th:text="${r.uri}"></td>
+                                    <td style="width:20%;text-align: left;" th:text="${r.name}"></td>
+                                    <td style="width:20%;text-align: left;" th:text="${r.value}"></td>
                                 </tr>
 
 
@@ -263,8 +263,7 @@
                                     </thead>
 
                                     <tbody style="display:block;height:300px;overflow-y:scroll;">
-                                    <tr style="width:20%;cursor:pointer"
-                                        th:each="r,rStat: ${statistics.propertyDis}">
+                                    <tr style="width:20%;cursor:pointer" th:each="r,rStat: ${statistics.propertyDis}">
 
                                         <td style="width:20%;text-align: left;" th:text="${r.uri}"></td>
                                         <td style="width:20%;text-align: left;"
@@ -1100,74 +1099,7 @@
                 })
 
             }
-            else if(element==='samples'){
-                $.ajax({
-                    type:"get",
 
-                    url:"/getTopK",
-                    data:{
-                        session_id:sessionStorage.getItem("session_id"),
-                        dataset_local_id:sessionStorage.getItem("ID"),
-                    },
-                    contentType:"application/json; charset=utf-8",
-
-                    beforeSend:function(d){
-                        $("#samplesloading").show()
-
-
-                    },
-
-                    success:function (d){
-                        console.log(d)
-                        var innerText = ''
-                        for (var i=0;i<d[0].length;i++){
-                            innerText+='<tr >\n' +
-                                '<td  style="font-weight: bold;">'+d[0][i].entity+'</td>\n' +
-                                '<td style="text-align: left" >'+d[0][i].count+'</td>\n' +
-                                '</tr>'
-                        }
-                        $("#samplesloading").fadeOut()
-
-                        $('#inDegreeData').html(innerText)
-
-                        var outDegreeData = ''
-                        for (var i=0;i<d[1].length;i++){
-                            outDegreeData+='<tr >\n' +
-                                '<td  style="font-weight: bold;">'+d[1][i].entity+'</td>\n' +
-                                '<td style="text-align: left" >'+d[1][i].count+'</td>\n' +
-                                '</tr>'
-                        }
-                        $('#outDegreeData').html(outDegreeData)
-                        $('#TopK').fadeIn()
-                    },
-                    error:function (e){
-                        console.log(e)
-                    }
-                })
-
-            }
-            else if(element==='explore'){
-                $.ajax({
-                    type:"get",
-
-                    url:"/getExploreClass",
-                    data:{
-                        session_id:sessionStorage.getItem("session_id"),
-                        dataset_local_id:sessionStorage.getItem("ID"),
-                    },
-                    contentType:"application/json; charset=utf-8",
-
-                    success:function (d){
-                        console.log(d)
-
-
-                    },
-                    error:function (e){
-                        console.log(e)
-                    }
-                })
-
-            }
             else if(element==='metadata'){
                 $.ajax({
                     type:"get",
@@ -1328,7 +1260,8 @@
             }
             $("#"+element).fadeIn()
 
-        }else{
+        }
+        else{
             $("#"+element).fadeIn()
         }
 
@@ -1420,180 +1353,9 @@
                         $('#' + $(element).attr('title')+' .needData').html(innerText)
                         sessionStorage.setItem("divLP",JSON.stringify(d))
                         idx_LP=0
-                        showCluster3(d[0].onePattern,d[0].twoPattern,d[0].property,"divLP")
+                        showCluster3(d[0].onePattern,d[0].twoPattern,d[0].property,"divLP",d[0].name)
                     }
-                    else if($(element).attr('title')=="ExpLOD"){
 
-                        sessionStorage.setItem("ExpLOD",JSON.stringify(d))
-                        idx_ExpLOD=0
-                        showTree(d[0],"","#containerExpLOD")
-                    }
-                    else if($(element).attr('title')=="HITS"){
-                        var innerText = ''
-                        for (var i=0;i<d[0].length;i++){
-                            innerText+='<tr>\n' +
-                                '<td style="font-weight: bold;">'+d[0][i].entity+'</td>\n' +
-                                '<td style="text-align: left;" >'+d[0][i].hub+'</td>\n' +
-                                '</tr>'
-                        }
-                        $('#hubData').html(innerText)
-
-                        var innerText2 = ''
-                        for (var i=0;i<d[1].length;i++){
-                            innerText2+='<tr>\n' +
-                                '<td style="font-weight: bold;">'+d[1][i].entity+'</td>\n' +
-                                '<td style="text-align: left;" >'+d[1][i].authority+'</td>\n' +
-                                '</tr>'
-                        }
-                        $('#authorityData').html(innerText2)
-
-
-                    }
-                    else if($(element).attr('title')=="PageRank"){
-                        var innerText=''
-                        for(var i=0;i<d.length;i++){
-                            innerText+='<tr>\n' +
-                                ' <td  style="font-weight: bold;">'+d[i].entity+'</td>\n' +
-                                ' <td style="text-align: left;" >'+d[i].score+'</td>\n' +
-                                '</tr>'
-                        }
-                        $('#' + $(element).attr('title')+' .needData').html(innerText)
-
-
-                    }
-                    else if($(element).attr('title')=="TripleRank"){
-                        var innerText = ''
-                        for(var i=0;i<d.length;i++){
-                            innerText+='<div class="row" >\n' +
-                                '                                    <div class="col-lg-6">\n' +
-                                '                                        <table class="table table-responsive" >\n' +
-                                '                                            <thead >\n' +
-                                '                                            <tr style="display:block;">\n' +
-                                '\n' +
-                                '                                                <th style="width:20%;font-weight: bold">Score</th>\n' +
-                                '                                                <th style="width:20%;text-align: left;font-weight: bold">Entity</th>\n' +
-                                '\n' +
-                                '                                            </tr>\n' +
-                                '                                            </thead>\n' +
-                                '\n' +
-                                '                                            <tbody  style="height: 400px;width:450px;overflow: auto;display:block">\n'
-                                for (var j=0;j<d[i][0].length;j++){
-                                    innerText+='                                            <tr >\n' +
-                                        '                                                <td style="width:20%;text-align: left;font-weight: bold" >'+d[i][0][j].score+'</td>\n' +
-                                        '                                                <td style="width:20%;text-align: left" >'+d[i][0][j].entity+'</td>\n' +
-                                        '\n' +
-                                        '                                            </tr>\n'
-                                }
-
-                            innerText+='\n' +
-                                '                                            </tbody>\n' +
-                                '                                        </table>\n' +
-                                '                                    </div>\n' +
-                                '\n' +
-                                '\n' +
-                                '                                    <div class="col-lg-6">\n' +
-                                '\n' +
-                                '                                        <table class="table table-responsive">\n' +
-                                '                                            <thead>\n' +
-                                '                                            <tr style="display:block;">\n' +
-                                '\n' +
-                                '\n' +
-                                '                                                <th style="width:20%;text-align: left;font-weight: bold">Score</th>\n' +
-                                '                                                <th style="width:20%;text-align: left;font-weight: bold">Predicate</th>\n' +
-                                '                                            </tr>\n' +
-                                '                                            </thead>\n' +
-                                '\n' +
-                                '                                            <tbody  style="height: 400px;width:450px;overflow: auto;display:block">\n'
-                                for(var j=0;j<d[i][1].length;j++){
-                                    innerText+='                                            <tr th:each="rel:${tt[1]}">\n' +
-                                        '\n' +
-                                        '\n' +
-                                        '                                                <td style="width:20%;text-align: left;font-weight: bold" >'+d[i][1][j].score+'</td>\n' +
-                                        '                                                <td style="width:20%;text-align: left">'+d[i][1][j].relation+'</td>\n' +
-                                        '                                            </tr>\n'
-                                }
-                        innerText+=        '\n' +
-                                '                                            </tbody>\n' +
-                                '                                        </table>\n' +
-                                '\n' +
-                                '                                    </div>\n' +
-                                '\n' +
-                                '                                </div>'
-                        }
-
-                        $('#' + $(element).attr('title')+' .needData').html(innerText)
-
-
-                    }
-                    else if($(element).attr('title')=="ROCKER"){
-                        var innerText = ''
-                        for(var i=0;i<d.length;i++){
-                            innerText+='<div class="panel panel-default m-t-15" >\n' +
-                                '                    <div class="panel-heading" >'+d[i].class+'</div>\n' +
-                                '                    <div class="panel-body" style="height: 400px;overflow-y: auto">\n' +
-                                '\n' +
-                                '\n' +
-                                '                        <table class="table table-responsive table-condensed"  border="1" frame="void" rules="cols" bordercolor="#ddd">\n' +
-                                '                            <thead >\n' +
-                                '                            <tr >\n' +
-                                '\n' +
-                                '                                <th style="font-weight: bold;">property</th>\n' +
-                                '                                <th style="text-align: left;font-weight: bold;">score</th>\n' +
-                                '\n' +
-                                '                            </tr>\n' +
-                                '\n' +
-                                '                            </thead>\n' +
-                                '\n' +
-                                '\n'
-                                for(var j=0;j<d[i].list.length;j++){
-                                    innerText+='                            <tbody >\n' +
-                                    '                            <tr>\n' +
-                                    '                                <td style="font-weight: bold;">'+d[i].list[j].oneProperty+'</td>\n' +
-                                    '                                <td style="text-align: left;vertical-align: middle;" rowspan="'+d[i].list[j].count+'">'+d[i].list[j].score+'</td>\n' +
-                                    '                            </tr>\n' +
-                                    '\n' +
-                                    '\n' +
-                                    '\n'
-                                    if(d[i].list[j].property!=null){
-                                        for(var k=0;k<d[i].list[j].property.length;k++){
-                                            innerText+='                            <tr >\n' +
-                                                '                                <td th:text="${pp}" style="font-weight: bold;text-align: left">'+d[i].list[j].property[k]+'</td>\n' +
-                                                '<!--                                <td style="text-align: left" th:text="${key.}" th:rowspan=""></td>-->\n' +
-                                                '                            </tr>\n'
-                                        }
-                                    }
-
-                                    innerText+='\n' +
-                                    '\n' +
-                                    '\n' +
-                                    '                            </tbody>\n'
-                                }
-                                innerText+='                        </table>\n' +
-                                '\n' +
-                                '\n' +
-                                '                    </div>\n' +
-                                '                </div>'
-                        }
-                        $('#' + $(element).attr('title')+' .needData').html(innerText)
-
-                    }
-                    else if($(element).attr('title')=="Illustrative"){
-                        if(d[0].length == 0){
-                            document.getElementById("noIll").style.display="";
-                        }else{
-
-
-                            var options = {}
-                            options.width = 1558
-                            options.height = 600
-                            options.flag = true
-
-                            showSnippet(d[0],d[1],"illSnippet",tooltip,options)
-                        }
-
-
-
-                    }
                     else if($(element).attr('title')=="resource"){
                         var innerText=''
                         for(var i=0;i<d.length;i++){
@@ -1785,7 +1547,7 @@
                 console.log("idx_LP:"+idx_LP)
 
 
-                showCluster3(tmp[idx_LP].onePattern,tmp[idx_LP].twoPattern,tmp[idx_LP].property,"divLP")
+                showCluster3(tmp[idx_LP].onePattern,tmp[idx_LP].twoPattern,tmp[idx_LP].property,"divLP",tmp[idx_LP].name)
             }
         }
         else if(type==='ExpLOD'){
@@ -1818,7 +1580,7 @@
         }else if(divID==='divLP'){
             idx_LP = d
             var tmp = JSON.parse(sessionStorage.getItem(divID))
-            showCluster3(tmp[d].onePattern,tmp[d].twoPattern,tmp[d].property,divID)
+            showCluster3(tmp[d].onePattern,tmp[d].twoPattern,tmp[d].property,divID,tmp[d].name)
         }
 
 

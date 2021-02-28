@@ -38,38 +38,32 @@ public class GlobalVariances {
     public static int LOCAL = 0;
     public static int REMOTE = 1;
 
-    @Autowired
-    @Qualifier("primaryDataSource")
-    DataSource primaryDataSource;
-
-    @Autowired
-    @Qualifier("secondaryDataSource")
-    public  DataSource secondDataSource;
-
-    public static Set<String> getStopWords()
-    {
-        if(null != stopWords) return stopWords;
-        stopWords = new HashSet<>(); stopWords.clear();
-        try
-        {
-            Scanner sc = new Scanner(new File( stopWordsPath ));
-            while(sc.hasNextLine())
-            {
-                String str = sc.nextLine();
-                stopWords.add(str.replace("\n", "").replace("\r", ""));
-            }
-            sc.close();
-        } catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-        return stopWords;
-    }
 
 
-    public static Analyzer globalAnalyzer(){
-        return new EnglishAnalyzer(new CharArraySet(getStopWords(),true));
-    }
+//    public static Set<String> getStopWords()
+//    {
+//        if(null != stopWords) return stopWords;
+//        stopWords = new HashSet<>(); stopWords.clear();
+//        try
+//        {
+//            Scanner sc = new Scanner(new File( stopWordsPath ));
+//            while(sc.hasNextLine())
+//            {
+//                String str = sc.nextLine();
+//                stopWords.add(str.replace("\n", "").replace("\r", ""));
+//            }
+//            sc.close();
+//        } catch (FileNotFoundException e)
+//        {
+//            e.printStackTrace();
+//        }
+//        return stopWords;
+//    }
+//
+//
+//    public static Analyzer globalAnalyzer(){
+//        return new EnglishAnalyzer(new CharArraySet(getStopWords(),true));
+//    }
 
 
 }
