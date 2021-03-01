@@ -75,7 +75,7 @@ function showCluster(data,divID) {
         .text(d => d.name)
 
     var svg = main.append("g")
-        .attr("transform", "translate(120,0)scale(0.7)");
+        .attr("transform", "translate(120,25)scale(0.7)");
 
     var nodes = cluster.nodes(data);
     var links = cluster.links(nodes);

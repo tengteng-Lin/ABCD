@@ -75,11 +75,11 @@ function showCluster3(data,data1,property,divID,title) {
 
     var g1 = svg
         .append("g")
-        .attr("transform", "rotate(180,180,120)translate(150,10)scale(0.4)");
+        .attr("transform", "rotate(180,180,120)translate(150,-10)scale(0.5)");
 
     var g2 = svg
         .append("g")
-        .attr("transform", "translate(300,110)scale(0.4)");
+        .attr("transform", "translate(300,100)scale(0.5)");
 
     var nodes = cluster.nodes(data);
     var links = cluster.links(nodes);
@@ -398,7 +398,7 @@ function showCluster3(data,data1,property,divID,title) {
         });
 
     svg.append('g')
-        .attr("transform", "translate(210,110)scale(0.4)")
+        .attr("transform", "translate(210,115)scale(0.4)")
         .append("line")
         .data(root)
         .attr("x1", function (d) {
@@ -419,7 +419,7 @@ function showCluster3(data,data1,property,divID,title) {
         .attr("marker-end","url(#arrowProperty)");
 
     svg.append('g')
-        .attr("transform", "translate(210,80)scale(0.6)")
+        .attr("transform", "translate(210,88)scale(0.6)")
         .append("text")
         .data(root)
         .attr("dx", 45)
@@ -427,7 +427,7 @@ function showCluster3(data,data1,property,divID,title) {
         .attr("dy", 140)
         // .attr("font-size",20)
 
-        .attr("textLength",50)
+        .attr("textLength",60)
         .attr("lengthAdjust","spacingAndGlyphs")
         .attr("font-style","italic")
         .attr("font-weight","bold")
