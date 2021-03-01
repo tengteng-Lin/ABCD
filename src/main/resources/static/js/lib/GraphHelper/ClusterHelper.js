@@ -230,6 +230,7 @@ function showCluster(data,divID) {
         .style("text-anchor", function(d) {
             return d.children ? "end" : "start";
         })
+        .attr("font-size",20)
         .text(function(d) {
 
 

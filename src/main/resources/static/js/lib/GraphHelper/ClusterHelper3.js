@@ -22,7 +22,7 @@ function showCluster3(data,data1,property,divID,title) {
     var lineColor_2 = "#CD5C5C"
 
     // 树状图因为默认是上往下渲染的，改成从左往右渲染后会发现width和height都倒过来了，可以看具体参数的细节
-    let width = 500
+    let width = 560
     let height = 300
 
     var cluster = d3.layout.cluster()
@@ -75,7 +75,7 @@ function showCluster3(data,data1,property,divID,title) {
 
     var g1 = svg
         .append("g")
-        .attr("transform", "rotate(180,180,120)translate(150,-10)scale(0.5)");
+        .attr("transform", "rotate(180,180,120)translate(100,-10)scale(0.5)");
 
     var g2 = svg
         .append("g")
@@ -368,12 +368,13 @@ function showCluster3(data,data1,property,divID,title) {
         .attr("dy", function (d) {
             return d.children ? 25:3
         })
-        .attr("transform", "rotate(180,18,120)translate(0,240)")
+        .attr("transform", "rotate(180,18,120)translate(20,240)")
         // .attr('transform', function (d) { return d.x < 180 ? null : 'rotate(270)' })
         .style("text-anchor", function(d) {
             return d.children ? "end" : "end";
         })
-        .attr("font-size",16)
+        // .attr("textLength",80)
+        .attr("font-size",17)
         .text(function(d) {
             return d.children ? "" : d.name;
         });
@@ -389,7 +390,7 @@ function showCluster3(data,data1,property,divID,title) {
                 return 25
             }
         })
-        .attr("font-size",16)
+        .attr("font-size",17)
         .style("text-anchor", function(d) {
             return d.children ? "end" : "start";
         })
@@ -403,7 +404,7 @@ function showCluster3(data,data1,property,divID,title) {
         .data(root)
         .attr("x1", function (d) {
 
-            return 0;
+            return 125;
         })
         .attr("y1", function (d) {
             return 150;
@@ -419,7 +420,7 @@ function showCluster3(data,data1,property,divID,title) {
         .attr("marker-end","url(#arrowProperty)");
 
     svg.append('g')
-        .attr("transform", "translate(210,88)scale(0.6)")
+        .attr("transform", "translate(230,85)scale(0.6)")
         .append("text")
         .data(root)
         .attr("dx", 45)
@@ -427,7 +428,7 @@ function showCluster3(data,data1,property,divID,title) {
         .attr("dy", 140)
         // .attr("font-size",20)
 
-        .attr("textLength",60)
+        .attr("textLength",80)
         .attr("lengthAdjust","spacingAndGlyphs")
         .attr("font-style","italic")
         .attr("font-weight","bold")
