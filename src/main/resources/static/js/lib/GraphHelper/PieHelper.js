@@ -1,6 +1,9 @@
 
 
 function showPie(data,divID,title) {
+    var colorScale = d3.scaleOrdinal()
+        .domain(d3.range(data.length))
+        .range(d3.schemeCategory10);
 
 
     width = 350,
@@ -8,73 +11,56 @@ function showPie(data,divID,title) {
 
     var svg = d3.select(divID)
         .append("svg")
-        .attr({
-            "width":width,
-            "height":height
-        })
+        .attr("width",width)
+        .attr("height",height)
+
 
     //legend尝试
 
 
-    var legend = svg.append('defs')
-        .append('g')
-        .attr('id', 'graph')
+    // var legend = svg.append('defs')
+    //     .append('g')
+    //     .attr('id', 'graph')
+    //
+    // legend.append('line')
+    //     .attr('x1', 0)
+    //     .attr('y1', 0)
+    //     .attr('x2', 15)
+    //     .attr('y2', 0)
+    //     .style('stroke', 'inherit')
+    //
+    //
+    //
+    // let ele = svg.selectAll('graph-item').data(data);
+    //
+    // let ent = ele.enter().append('g')
+    //     .attr('class', 'graph-item')
+    //
+    // ent.append('use')
+    //     .attr('x', 160)
+    //     .attr('y', (d,i) => i * 20+150)
+    //     .attr('xlink:href', '#graph')
+    //     .attr('stroke', "#000")
+    //     .style('cursor', 'pointer')
+    //
+    // ent.append('text')
+    //     .attr('x', (d,i) => i * 130 + 132)
+    //     .attr('y', 20)
+    //     .attr('dy', '.2em')
+    //     .attr('fill', '#444')
+    //     .style('font-size', '13px')
+    //     .style('cursor', 'pointer')
+    //     .text(d => d.name)
 
-    legend.append('line')
-        .attr('x1', 0)
-        .attr('y1', 0)
-        .attr('x2', 15)
-        .attr('y2', 0)
-        .style('stroke', 'inherit')
-
-    // legend.append('circle')
-    //     .attr('cx', 15)
-    //     .attr('cy', 0)
-    //     .attr('r', 6.5)
-    //     .attr('stroke', 'inherit')
-    //     .attr('fill', '#000')
-
-    let ele = svg.selectAll('graph-item').data(data);
-
-    let ent = ele.enter().append('g')
-        .attr('class', 'graph-item')
-
-    ent.append('use')
-        .attr('x', 160)
-        .attr('y', (d,i) => i * 20+150)
-        .attr('xlink:href', '#graph')
-        .attr('stroke', "#000")
-        .style('cursor', 'pointer')
-
-    ent.append('text')
-        .attr('x', (d,i) => i * 130 + 132)
-        .attr('y', 20)
-        .attr('dy', '.2em')
-        .attr('fill', '#444')
-        .style('font-size', '13px')
-        .style('cursor', 'pointer')
-        .text(d => d.name)
-    // ent.render()
-
-
-    // svg.append('text')
-    //     .attr('x', width / 2 - 100)
-    //     .attr('y', 30)
-    //     .attr('class', 'title')
-    //     .text(title);
 
     var main = svg.append("g")
         .attr("transform","translate(200, 200)")
 
-    // var  = svg.append("g")
-    //     .attr("transform","translate(200, 200)")
-    // 设置标题
-    // var svg = d3.select(divID).select("svg")
 
 
 
     // 转换原始数据为能用于绘图的数据
-    var pie = d3.layout.pie()
+    var pie = d3.pie()
         .sort(null)
         .value(function(d) {
             return d.value;
@@ -83,14 +69,14 @@ function showPie(data,divID,title) {
     var pieData = pie(data);
     // 创建计算弧形路径的函数
     var radius = 100;
-    var arc = d3.svg.arc()
+    var arc = d3.arc()
         .innerRadius(0)
         .outerRadius(radius);
 
-    var outerArc = d3.svg.arc()
+    var outerArc = d3.arc()
         .innerRadius(0)
         .outerRadius(1.15 * radius);
-    var oArc = d3.svg.arc()
+    var oArc = d3.arc()
         .innerRadius(1.1 * radius)
         .outerRadius(1.1 * radius);
     var slices = main.append('g').attr('class', 'slices');
@@ -100,7 +86,6 @@ function showPie(data,divID,title) {
     var arcs = slices.selectAll('g')
         .data(pieData)
         .enter()
-
         .append('path')
         .attr('fill', function(d, i) {
             return getColor(i);

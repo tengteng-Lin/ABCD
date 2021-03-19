@@ -4,31 +4,12 @@ function showCluster2(data,data1,property,divID) {
 
 
 
-    //定义legend
-    legendProperty = [{
-        "name":"out property",
-        "color":"#CD9B1D"
-
-    },{
-        "name":"in property",
-        "color":"#CD5C5C"
-
-    },
-        {
-            "name":"class",
-            "color":"#2F4F4F"
-
-        },
-    ]
-
-    numID = parseInt(divID.substring(6));
-
     var lineColor_0 = "#CD9B1D"; //连线颜色
     var lineColor_1 = "#2F4F4F"
     var lineColor_2 = "#CD5C5C"
 
     // 树状图因为默认是上往下渲染的，改成从左往右渲染后会发现width和height都倒过来了，可以看具体参数的细节
-    let width = 250
+    let width = 300
     let height = 300
 
     var cluster = d3.layout.cluster()
@@ -39,39 +20,6 @@ function showCluster2(data,data1,property,divID) {
             console.log(d)
             return [d.y, d.x];
         });
-
-    // var legend = main.append('defs')
-    //     .append('g')
-    //     .attr('id', 'graph')
-    //
-    // legend.append('line')
-    //     .attr('x1', 0)
-    //     .attr('y1', 0)
-    //     .attr('x2', 15)
-    //     .attr('y2', 0)
-    //     .style('stroke', 'inherit')
-    //
-    //
-    // let ele = main.selectAll('graph-item').data(legendProperty);
-    //
-    // let ent = ele.enter().append('g')
-    //     .attr('class', 'graph-item')
-    //
-    // ent.append('use')
-    //     .attr('x', (d,i) => i * 110 + 50)
-    //     .attr('y', 20)
-    //     .attr('xlink:href', '#graph')
-    //     .attr('stroke', d => d.color)
-    //     .style('cursor', 'pointer')
-    //
-    // ent.append('text')
-    //     .attr('x', (d,i) => i * 110 + 70)
-    //     .attr('y', 20)
-    //     .attr('dy', '.2em')
-    //     .attr('fill', '#444')
-    //     .style('font-size', '13px')
-    //     .style('cursor', 'pointer')
-    //     .text(d => d.name)
 
     var svg = d3.select("#"+divID).append("svg")
         .attr("width", width)
@@ -403,12 +351,12 @@ function showCluster2(data,data1,property,divID) {
 
     svg.append("text")
          .data(root)
-        .attr("dx", 380)
+        .attr("dx", 435)
         .style("text-anchor", "start")
         .attr("dy", 90)
         // .attr("font-size",20)
         .attr("transform", "rotate(180,180,120)")
-        .attr("textLength",40)
+        .attr("textLength",50)
         .attr("lengthAdjust","spacingAndGlyphs")
         .attr("font-style","italic")
         .attr("font-weight","bold")
@@ -422,7 +370,7 @@ function showCluster2(data,data1,property,divID) {
         .attr("dy", 150)
         // .attr("font-size",20)
         // .attr("transform", "rotate(180,180,120)translate(65,-70)")
-        .attr("textLength",40)
+        .attr("textLength",50)
         .attr("lengthAdjust","spacingAndGlyphs")
         .attr("font-style","italic")
         .attr("font-weight","bold")

@@ -1,5 +1,6 @@
 package com.ltt;
 
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
@@ -19,31 +20,13 @@ public class DemoApplication {
 
 //    @Autowired
 //    @Qualifier("primaryDataSource")
-    public static DataSource primaryDataSource;
-    public static DataSource secondDataSource;
+    public static HikariDataSource primaryDataSource;
+    public static HikariDataSource secondDataSource;
 
     public static void main(String[] args) {
         ApplicationContext applicationContext = SpringApplication.run(DemoApplication.class, args);
-        primaryDataSource = applicationContext.getBean("primaryDataSource",DataSource.class);
-        secondDataSource = applicationContext.getBean("secondaryDataSource",DataSource.class);
-//        try{
-//            Connection connection = dataSource.getConnection();
-//            ResultSet rs = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-//                    ResultSet.CONCUR_UPDATABLE)
-//                    .executeQuery("SELECT * from uri_label_id2 where dataset_local_id=1;");
-//            while(rs.next()){
-//                System.out.println(rs.getString("uri"));
-//            }
-//            if (rs.first()) {
-//
-//                System.out.println("Connection OK!");
-//            } else {
-//                System.out.println("Something is wrong");
-//            }
-//
-//        }catch(Exception e){
-//            e.printStackTrace();
-//        }
+        primaryDataSource = (HikariDataSource) applicationContext.getBean("primaryDataSource",DataSource.class);
+        secondDataSource = (HikariDataSource) applicationContext.getBean("secondaryDataSource",DataSource.class);
 
     }
 

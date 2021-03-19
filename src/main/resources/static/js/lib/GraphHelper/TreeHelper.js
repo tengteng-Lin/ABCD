@@ -2,7 +2,7 @@
 function showTree(root,title,divID) {
 
     var width = 800 // edited
-    var   height = 400;
+    var height = 400;
 
 
     var tree = d3.layout.tree()

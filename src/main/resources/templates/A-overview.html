@@ -27,13 +27,17 @@
     <script src="../static/js/lib/sidebar.js"></script><!-- sidebar -->
     <script src="../static/js/lib/bootstrap.min.js"></script><!-- bootstrap -->
     <script src="../static/js/scripts.js"></script>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
     <script src="../static/js/lib/GraphHelper/ScatterHelper.js"></script>
     <script src="../static/js/lib/GraphHelper/PieHelper.js"></script>
-    <script src="../static/js/lib/GraphHelper/ClusterHelper3.js"></script>
-    <script src="../static/js/lib/GraphHelper/ClusterHelper.js"></script>
-    <script src="../static/js/lib/GraphHelper/TreeHelper.js"></script>
+    <!--<script src="../static/js/lib/GraphHelper/ClusterHelper3.js"></script>-->
+    <script src="../static/js/lib/GraphHelper/v5Tree.js"></script>
+    <script src="../static/js/lib/GraphHelper/v5Tree2.js"></script>
+    <script src="../static/js/lib/GraphHelper/TreeHelper2.js"></script>
     <script src="../static/js/lib/GraphHelper/D3Helper.js"></script>
+    <script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>
+    <script type="text/javascript" src="../static/js/lib/GraphHelper/OneStepHelper.js"></script>
+    <script type="text/javascript" src="../static/js/lib/GraphHelper/RelationHelper.js"></script>
 
     <link href="../static/css/lib/font-awesome.min.css" rel="stylesheet">
     <link href="../static/css/lib/themify-icons.css" rel="stylesheet">
@@ -52,13 +56,18 @@
     <script src="/js/lib/sidebar.js"></script><!-- sidebar -->
     <script src="/js/lib/bootstrap.min.js"></script><!-- bootstrap -->
     <script src="/js/scripts.js"></script>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="http://d3js.org/d3.v5.min.js" charset="utf-8"></script>
     <script src="/js/lib/GraphHelper/ScatterHelper.js"></script>
     <script src="/js/lib/GraphHelper/PieHelper.js"></script>
-    <script src="js/lib/GraphHelper/ClusterHelper3.js"></script>
-    <script src="js/lib/GraphHelper/ClusterHelper.js"></script>
-    <script src="js/lib/GraphHelper/TreeHelper.js"></script>
-    <script src="js/lib/GraphHelper/D3Helper.js"></script>
+    <!--<script src="/js/lib/GraphHelper/ClusterHelper3.js"></script>-->
+    <script src="/js/lib/GraphHelper/v5Tree.js"></script>
+    <script src="/js/lib/GraphHelper/v5Tree2.js"></script>
+    <script src="/js/lib/GraphHelper/TreeHelper2.js"></script>
+    <script src="/js/lib/GraphHelper/D3Helper.js"></script>
+    <script src="/js/lib/GraphHelper/OneStepHelper.js"></script>
+    <script type="text/javascript" src="/js/lib/GraphHelper/RelationHelper.js"></script>
+    <!--<script type="text/javascript" src="http://d3js.org/d3.v5.min.js"></script>-->
+    <!--<script type="text/javascript" src="/js/lib/GraphHelper/OneStepHelper.js"></script>-->
 
 
     <link href="/css/lib/font-awesome.min.css" rel="stylesheet">
@@ -864,21 +873,22 @@
 
         $("#"+parent+" .tabs li").attr("class", ""); //Reset id's
         $(element).parent().attr("class", "current"); // Activate this
-        console.log($(element).parent())
+        // console.log($(element).parent())
 
 
 
         //直接设置一个全局bool变量即可
         var tBodyText = $('#' + $(element).attr('title')+' .needData').html()
-        console.log(tBodyText)
+        // console.log(tBodyText)
 
+        loadingstr = $(element).parent().parent().parent().parent().attr("id")
 
         if(tBodyText== '' ){
             console.log("nullnull")
             //向后台发消息
             $.ajax({
                 type:"get",
-                async:false,
+                // async:false,
                 url:"/get"+$(element).attr('title'),
                 data:{
                     session_id:sessionStorage.getItem("session_id"),
@@ -886,20 +896,14 @@
                 },
                 contentType:"application/json; charset=utf-8",
 
+                beforeSend: function (d) {
+                    $("#" + loadingstr + "loading").fadeIn()
+                },
+
                 success:function (d){
-                    console.log(d)
-                    if($(element).attr('title')=="namespace"){
-                        //添加形式不一样，有的是表格，有的是列表
-                        var innerText = ''
-                        for (var i=0;i<d.length;i++){
-                            innerText+=' <tr>\n' +
-                                '<td style="font-weight: bold" >'+d[i].vocab+'</td>\n' +
-                                '<td style="text-align: left" >'+d[i].prefix+'</td>\n' +
-                                '</tr>'
-                        }
-                        $('#' + $(element).attr('title')+' .needData').html(innerText)
-                    }
-                    else if($(element).attr('title')=="PAnDA"){
+                    $("#" + loadingstr + "loading").fadeOut()
+
+                    if($(element).attr('title')=="PAnDA"){
                         //添加形式不一样，有的是表格，有的是列表
                         var innerText = ''
                         for (var i=0;i<d.length;i++){
@@ -910,7 +914,7 @@
                                 ' <td style="width:20%;text-align: left" >'+d[i].count+'</td>\n' +
                                 ' </tr>'
                         }
-                        console.log(innerText)
+                        // console.log(innerText)
                         $('#' + $(element).attr('title')+' .needData').html(innerText)
                     }
                     else if($(element).attr('title')=="EDP"){
@@ -1062,14 +1066,14 @@
                         $("#extraID").html(innerText);
                     }
 
-
+                    $('#' + $(element).attr('title')).fadeIn(); // Show content for current tab
 
                 },
                 error:function (e){
                     console.log(e)
                 }
             })
-            $('#' + $(element).attr('title')).fadeIn(); // Show content for current tab
+
 
         }else{
             console.log("not null")
