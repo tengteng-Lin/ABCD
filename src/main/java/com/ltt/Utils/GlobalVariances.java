@@ -24,7 +24,18 @@ public class GlobalVariances {
     public static String storeDir = "D:\\db_index";
     public static Integer commit_limit = 10;
 
+
+
     public static String indexDir = "D:\\Index\\db_index";
+
+    public static String edpDir = "D:\\Index\\EDPIndex202103\\";
+    public static String lpDir = "D:\\Index\\LPIndex202103\\";
+    public static String rockerDir = "D:\\Index\\ROCKER\\";
+    public static String explodDir = "D:\\Index\\ExpLOD\\";
+    public static String triplerankDir = "D:\\Index\\TripleRankResult\\";
+    public static String linedegreeDir = "D:\\Index\\LineDegree2\\";
+    public static String filterDir = "D:\\Index\\Filter\\";
+    public static String namespaceDir = "D:\\Index\\Namespace2\\";
 
 
     public static String stopWordsPath = "Conf/stopwords.txt";

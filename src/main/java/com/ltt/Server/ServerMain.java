@@ -82,31 +82,18 @@ public class ServerMain {
 
     public List<JSONObject> getEDPPattern(String session_id,Integer dataset_local_id){
         List<JSONObject> edpList = sessionMap.get(session_id).getEDP();
-
-
-
         return edpList;
     }
 
     public List<JSONObject> getLPPattern(String session_id,Integer dataset_local_id){
         List<JSONObject> lpList = sessionMap.get(session_id).getLP();
-
-
-
         return lpList;
     }
 
 
-
     public List<JSONObject> getExpLOD(String session_id, Integer dataset_local_id){
-
         return sessionMap.get(session_id).getExoLOD2();
-
     }
-
-
-
-
 
 
     /** ABCD **/
@@ -117,14 +104,11 @@ public class ServerMain {
         modelAndView.addObject("session_id",session_id);
         modelAndView.addObject("dataset_local_id",dataset_local_id);
         modelAndView.setViewName("A-overview.html");
-
         return modelAndView;
-
     }
 
 
     public JSONObject getBasicInfo(String session_id,int dataset_local_id){
-
         return sessionMap.get(session_id).getBasicinfo(dataset_local_id);
     }
 
@@ -136,7 +120,16 @@ public class ServerMain {
         return sessionMap.get(session_id).getExtra(dataset_local_id);
     }
 
+    public List<JSONObject> getLPbyPage(String session_id,int dataset_local_id,int startIndex){
+        return sessionMap.get(session_id).getLPbyPage(dataset_local_id,startIndex);
+    }
 
+    public List<JSONObject> getEDPbyPage(String session_id,int dataset_local_id,int startIndex){
+        return sessionMap.get(session_id).getEDPbyPage(dataset_local_id,startIndex);
+    }
 
+    public List<List<JSONObject>> getClassAndProperty(String session_id){
+        return sessionMap.get(session_id).getClassAndProperty();
+    }
 
 }

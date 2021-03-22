@@ -9,6 +9,7 @@ import com.ltt.DemoApplication;
 import com.ltt.Model.Statistics.Statistics;
 import com.ltt.Utils.SpringContextUtil;
 import com.ltt.config.DataSourceConfig;
+import com.sun.org.apache.xpath.internal.operations.Mod;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -37,6 +38,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
@@ -48,6 +50,8 @@ import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static java.lang.Integer.min;
 
 @Component
 public class Session {
@@ -69,33 +73,131 @@ public class Session {
 
     /** data patterns **/
     private List<JSONObject> simplePatterns;
-    private AtomicBoolean boolsimplePatterns = new AtomicBoolean(false);
+    private final AtomicBoolean  boolsimplePatterns = new AtomicBoolean(false);
 
     private List<JSONObject> edpPatterns;
-    private AtomicBoolean booledpPatterns = new AtomicBoolean(false);
+    private final AtomicBoolean booledpPatterns = new AtomicBoolean(false);
 
     private List<JSONObject> lpPatterns;
-    private AtomicBoolean boollpPatterns = new AtomicBoolean(false);
+    private final AtomicBoolean boollpPatterns = new AtomicBoolean(false);
 
     private List<JSONObject> expLOD;
-    private AtomicBoolean boolexpLOD = new AtomicBoolean(false);
+    private final AtomicBoolean boolexpLOD = new AtomicBoolean(false);
 
 
     /** data samples **/
 
     private List<List<JSONObject>> illustrativeList;
-    private AtomicBoolean boolillustrativeList = new AtomicBoolean(false);
+    private final AtomicBoolean boolillustrativeList = new AtomicBoolean(false);
 
 
 
     /** metdata **/
     private JSONObject basicinfo;
-    private AtomicBoolean boolbasicinfo = new AtomicBoolean(false);
+    private final AtomicBoolean boolbasicinfo = new AtomicBoolean(false);
     private List<JSONObject> resources;
-    private AtomicBoolean boolresources = new AtomicBoolean(false);
+    private final AtomicBoolean boolresources = new AtomicBoolean(false);
     private List<JSONObject> extras;
-    private AtomicBoolean boolextras = new AtomicBoolean(false);
+    private final AtomicBoolean boolextras = new AtomicBoolean(false);
 
+    private List<List<JSONObject>> classAndProperties;
+    private final AtomicBoolean boolclassAndProperties = new AtomicBoolean(false);
+
+    class ClassAndPropertyThread extends Thread{
+        private int table_id;
+        private int database_dataset_local_id;
+        private int dataset_local_id;
+
+        public ClassAndPropertyThread(int table_id, int database_dataset_local_id,int dataset_local_id) {
+            this.table_id = table_id;
+            this.database_dataset_local_id = database_dataset_local_id;
+            this.dataset_local_id = dataset_local_id;
+            classAndProperties = new ArrayList<>();
+        }
+
+        @Override
+        public void run() {
+            String class_sql = String.format("SELECT * FROM class_count%d WHERE dataset_local_id=%d ORDER BY count DESC",table_id,database_dataset_local_id);
+            String property_sql = String.format("SELECT * FROM property_count%d WHERE dataset_local_id=%d ORDER BY count DESC",table_id,database_dataset_local_id);
+
+
+            int classSum = getClassCount("class",table_id,database_dataset_local_id);
+            int propertySum = getClassCount("property",table_id,database_dataset_local_id);
+
+            synchronized (boolclassAndProperties){
+                try{
+                    List<JSONObject> jsonClass = new ArrayList<>();
+                    List<JSONObject> jsonProperty = new ArrayList<>();
+
+                    Connection conn_remote = DemoApplication.secondDataSource.getConnection();
+                    Statement class_pst = conn_remote.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                            ResultSet.CONCUR_UPDATABLE);
+                    ResultSet class_rst = class_pst.executeQuery(class_sql);
+
+                    int classSumSelect = 20;
+                    int classClock =0;
+
+                    int class_id=0;
+                    while (class_rst.next()){
+                        classClock++;
+                        class_id = class_rst.getInt("class_id");
+                        List<String> tmp = sqlUtil.getURIAndLabelForId(table_id,database_dataset_local_id,class_id);
+
+
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("name",tmp.get(1));
+                        jsonObject.put("uri",tmp.get(0));
+                        jsonObject.put("value",(double)class_rst.getInt("count")/classSum);
+                        jsonClass.add(jsonObject);
+
+                        if(classClock>classSumSelect){
+                            break;
+                        }
+
+
+                    }
+
+                    Statement property_pst = conn_remote.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                            ResultSet.CONCUR_UPDATABLE);
+                    ResultSet property_rst = property_pst.executeQuery(property_sql);
+                    int propertySumSelect =10;
+                    if(propertySumSelect>GlobalVariances.MAX_CLASS_PROPERTY){
+                        propertySumSelect = (int)Math.round(propertySumSelect * 0.2);
+                    }else if(propertySumSelect<GlobalVariances.MAX_CLASS_PROPERTY && propertySumSelect>GlobalVariances.MIN_CLASS_PROPERTY){
+                        propertySumSelect = (int)Math.round(propertySumSelect * 0.6);
+                    }
+
+                    int propertyClock = 0;
+                    int property_id=0;
+
+                    while(property_rst.next()){
+                        propertyClock++;
+
+                        property_id = property_rst.getInt("property_id");
+
+                        List<String> tmp = sqlUtil.getURIAndLabelForId(table_id,database_dataset_local_id,property_id);
+
+
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("name",tmp.get(1));
+                        jsonObject.put("uri",tmp.get(0));
+                        jsonObject.put("value",(double)property_rst.getInt("count")/propertySum);
+                        jsonProperty.add(jsonObject);
+
+                        if(propertyClock>propertySumSelect)break;
+                    }
+
+                    classAndProperties.add(jsonClass);
+                    classAndProperties.add(jsonProperty);
+                    boolclassAndProperties.set(true);
+                    boolclassAndProperties.notify();
+
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
     class BasicInfoThread extends Thread{
         private int table_id;
@@ -155,9 +257,6 @@ public class Session {
                     boolbasicinfo.set(true);
                     boolbasicinfo.notify();
                     logger.info("basic info end!");
-
-
-
                 }catch(Exception e){
                     e.printStackTrace();
                 }
@@ -346,7 +445,7 @@ public class Session {
                             int count = Integer.parseInt(onePattern.substring(pos+1,onePattern.length()-1));
 
                             oneJSON.put("children",oneResult);
-                            oneJSON.put("name","pattern"+i);
+//                            oneJSON.put("name","pattern"+i);
                             oneJSON.put("count",count);
 
                             simplePatterns.add(oneJSON);
@@ -364,6 +463,10 @@ public class Session {
                         });
 
 
+                    }
+
+                    for(int i=0;i<simplePatterns.size();i++){
+                        simplePatterns.get(i).put("name","pattern_"+i);
                     }
 
 
@@ -392,30 +495,31 @@ public class Session {
 
         @Override
         public void run() {
-            int tableid = 2;
+            int table_id = 2;
 
-            int database_id = dataset_local_id;
+            int database_dataset_local_id = dataset_local_id;
             if(dataset_local_id>311){
-                database_id-=311;
-                tableid=3;
+                database_dataset_local_id-=311;
+                table_id=3;
             }
-            String indexReadPath = "D:\\Index\\EDPIndex202010\\";
-
             synchronized (booledpPatterns){
                 try {
-                    Directory directory = FSDirectory.open(Paths.get(indexReadPath+dataset_local_id));//打开索引文件夹
+                    Directory directory = FSDirectory.open(Paths.get(GlobalVariances.edpDir+dataset_local_id));//打开索引文件夹
                     IndexReader reader = DirectoryReader.open(directory);//读取目录
-                    int edpSum=0;
-                    for(int i=0;i<reader.maxDoc();i++){
-                        edpSum+=Integer.parseInt(reader.document(i).get("count"));
-                    }
+                    IndexSearcher searcherForEDP = new IndexSearcher(reader);
+                    //TODO sort
+                    SortField sortField = new SortField("count",SortField.Type.INT,true);
+                    Sort sort = new Sort(sortField);
+                    TopDocs tds = searcherForEDP.search(new MatchAllDocsQuery(),500000,sort);
+
+                    List<JSONObject> result = new ArrayList<>();
 
                     //一个pattern一个document
-                    for(int i=0;i<reader.maxDoc();i++){//从0开始从1开始？？？？
+                    for(int i=0;i<min(50,tds.scoreDocs.length);i++){//从0开始从1开始？？？？
                         JSONObject onePattern = new JSONObject();
                         List<JSONObject> children = new ArrayList<>();
 
-                        Document doc = reader.document(i);
+                        Document doc = searcherForEDP.doc(tds.scoreDocs[i].doc);
                         //只有一项和空length都为1
                         String strOutProperty = doc.get("outProperty");
                         if(strOutProperty.length()!=0){
@@ -423,7 +527,7 @@ public class Session {
                             for(int j=0;j<outProperty.length;j++){
                                 JSONObject jsonObject = new JSONObject();
 //                        System.out.println(outProperty[j]);
-                                String name = sqlUtil.getLabelForId(tableid,database_id,Integer.parseInt(outProperty[j]));
+                                String name = sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(outProperty[j]));
                                 jsonObject.put("name",name);
 
                                 jsonObject.put("type",0);
@@ -441,7 +545,7 @@ public class Session {
                             for(int j=0;j<inProperty.length;j++){
 
                                 JSONObject jsonObject = new JSONObject();
-                                jsonObject.put("name",sqlUtil.getLabelForId(tableid,database_id,Integer.parseInt(inProperty[j])));
+                                jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(inProperty[j])));
                                 jsonObject.put("type",0);
                                 jsonObject.put("inOrOut",0);
 
@@ -455,7 +559,7 @@ public class Session {
                             String [] classes = strClasses.trim().split(" ");
                             for(int j=0;j<classes.length;j++){
                                 JSONObject jsonObject = new JSONObject();
-                                jsonObject.put("name",sqlUtil.getLabelForId(tableid,database_id,Integer.parseInt(classes[j])));
+                                jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(classes[j])));
                                 jsonObject.put("type",1);
                                 jsonObject.put("inOrOut",1);
 
@@ -465,30 +569,15 @@ public class Session {
 
                         }
                         onePattern.put("children",children);
-
                         String count = doc.get("count");
-//                System.out.println("count:"+count);
-
-                        onePattern.put("count",(double)Integer.parseInt(count)/edpSum);
-
-
+                        onePattern.put("count",Integer.parseInt(count));
+                        onePattern.put("name","pattern"+i);
                         edpPatterns.add(onePattern);
                     }
 
-                    Collections.sort(edpPatterns, new Comparator<JSONObject>() {
 
-                        @Override
-                        public int compare(JSONObject o1, JSONObject o2) {
-//                    int count1 = Integer.parseInt(o1.get("count").toString());
-//                    int count2 = Integer.parseInt(o2.get("count").toString());
 
-                            return o2.getDouble("count").compareTo(o1.getDouble("count"));
-                        }
-                    });
 
-                    for(int i=0;i<edpPatterns.size();i++){
-                        edpPatterns.get(i).put("name","pattern_"+i);
-                    }
 
 
                     reader.close();//关闭资源
@@ -496,8 +585,8 @@ public class Session {
                 }catch(Exception e)    {
                     e.printStackTrace();
                 }
-//                System.out.println(edpPatterns);
-                logger.info("EDPPattern end!");
+
+
                 booledpPatterns.set(true);
                 booledpPatterns.notify();
 
@@ -517,41 +606,37 @@ public class Session {
 
         @Override
         public void run() {
-            int tableid = 2;
-            int database_id=dataset_local_id;
+            int table_id = 2;
+            int database_dataset_local_id=dataset_local_id;
 
             if(dataset_local_id>311){
-                database_id-=311;
-                tableid=3;
+                database_dataset_local_id-=311;
+                table_id=3;
             }
-            String indexReadPath = "D:\\Index\\LPIndex202010\\";
             synchronized (boollpPatterns){
 
                 List<JSONObject> fromResult = new ArrayList<>();
                 List<JSONObject> toResult = new ArrayList<>();
 
-
-
                 try {
-                    Directory directory = FSDirectory.open(Paths.get(indexReadPath+dataset_local_id));//打开索引文件夹
+                    Directory directory = FSDirectory.open(Paths.get(GlobalVariances.lpDir+dataset_local_id));//打开索引文件夹
                     IndexReader reader = DirectoryReader.open(directory);//读取目录
+                    IndexSearcher searcherForLP = new IndexSearcher(reader);
+                    //TODO sort
+                    SortField sortField = new SortField("count",SortField.Type.INT,true);
+                    Sort sort = new Sort(sortField);
 
-                    int lpSum=0;
-                    for(int i=0;i<reader.maxDoc();i++){
-                        lpSum+=Integer.parseInt(reader.document(i).get("count"));
-                    }
+                    TopDocs tds = searcherForLP.search(new MatchAllDocsQuery(),500000,sort);
+
+                    List<JSONObject> result = new ArrayList<>();
                     //一个pattern一个document
-                    for(int i=0;i<reader.maxDoc();i++){//从0开始从1开始？？？？
+                    for(int i=0;i<min(50,tds.scoreDocs.length);i++){//从0开始从1开始？？？？
                         JSONObject resultOne = new JSONObject();
 
-
-
-                        Document doc = reader.document(i);
+                        Document doc = searcherForLP.doc(tds.scoreDocs[i].doc);
 
                         int propertyID = Integer.parseInt(doc.get("propertyID"));
                         String count = doc.get("count");
-
-//                onePattern.put("name",count);
 
                         JSONObject onePattern = new JSONObject();
                         List<JSONObject> children = new ArrayList<>();
@@ -562,7 +647,7 @@ public class Session {
                             for(int j=0;j<fromInProperty.length;j++){
 
                                 JSONObject jsonObject = new JSONObject();
-                                jsonObject.put("name",sqlUtil.getLabelForId(tableid,database_id,Integer.parseInt(fromInProperty[j])));
+                                jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(fromInProperty[j])));
                                 jsonObject.put("type",0);
                                 jsonObject.put("inOrOut",0);
 
@@ -576,7 +661,7 @@ public class Session {
                             for(int j=0;j<fromOutProperty.length;j++){
                                 if(Integer.parseInt(fromOutProperty[j])==propertyID) continue;
                                 JSONObject jsonObject = new JSONObject();
-                                jsonObject.put("name",sqlUtil.getLabelForId(tableid,database_id,Integer.parseInt(fromOutProperty[j])));
+                                jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(fromOutProperty[j])));
                                 jsonObject.put("type",0);
                                 jsonObject.put("inOrOut",1);
 
@@ -590,7 +675,7 @@ public class Session {
                             String [] fromClasses = strFromClasses.trim().split(" ");
                             for(int j=0;j<fromClasses.length;j++){
                                 JSONObject jsonObject = new JSONObject();
-                                jsonObject.put("name",sqlUtil.getLabelForId(tableid,database_id,Integer.parseInt(fromClasses[j])));
+                                jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(fromClasses[j])));
                                 jsonObject.put("type",1);
                                 jsonObject.put("inOrOut",0);
 
@@ -614,7 +699,7 @@ public class Session {
                             for(int j=0;j<toInProperty.length;j++){
                                 if(Integer.parseInt(toInProperty[j])==propertyID) continue;
                                 JSONObject jsonObject = new JSONObject();
-                                jsonObject.put("name",sqlUtil.getLabelForId(tableid,database_id,Integer.parseInt(toInProperty[j])));
+                                jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(toInProperty[j])));
                                 jsonObject.put("type",0);
                                 jsonObject.put("inOrOut",0);
 
@@ -628,7 +713,7 @@ public class Session {
                             String [] toOutProperty = strToOutProperty.trim().split(" ");
                             for(int j=0;j<toOutProperty.length;j++){
                                 JSONObject jsonObject = new JSONObject();
-                                jsonObject.put("name",sqlUtil.getLabelForId(tableid,database_id,Integer.parseInt(toOutProperty[j])));
+                                jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(toOutProperty[j])));
                                 jsonObject.put("type",0);
                                 jsonObject.put("inOrOut",1);
 
@@ -642,50 +727,311 @@ public class Session {
                             String [] toClasses = strToClasses.trim().split(" ");
                             for(int j=0;j<toClasses.length;j++){
                                 JSONObject jsonObject = new JSONObject();
-                                jsonObject.put("name",sqlUtil.getLabelForId(tableid,database_id,Integer.parseInt(toClasses[j])));
+                                jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(toClasses[j])));
                                 jsonObject.put("type",1);
                                 jsonObject.put("inOrOut",0);
 
                                 children2.add(jsonObject);
 
                             }
-
                         }
 
                         twoPattern.put("children",children2);
-
                         resultOne.put("onePattern",onePattern);
                         resultOne.put("twoPattern",twoPattern);
-                        resultOne.put("count",(double)Integer.parseInt(count)/lpSum);
+                        resultOne.put("count",Integer.parseInt(count));
 
-                        resultOne.put("property",sqlUtil.getLabelForId(tableid,database_id,propertyID));
+                        resultOne.put("property",sqlUtil.getLabelForId(table_id,dataset_local_id,propertyID));
+                        resultOne.put("name","pattern"+i);
 
                         lpPatterns.add(resultOne);
 
                     }
 
-                    Collections.sort(lpPatterns, new Comparator<JSONObject>() {
 
-                        @Override
-                        public int compare(JSONObject o1, JSONObject o2) {
-                            return o2.getDouble("count").compareTo(o1.getDouble("count"));
-                        }
-                    });
 
-                    for(int i=0;i<lpPatterns.size();i++){
-                        lpPatterns.get(i).put("name","pattern_"+i);
-                    }
                     reader.close();//关闭资源
                     directory.close();//关闭连接
-                }catch(Exception e)    {
+                }
+                catch(Exception e)    {
                     e.printStackTrace();
                 }
                 boollpPatterns.set(true);
-                logger.info("LPPattern end!");
+                logger.info("LP ends!");
                 boollpPatterns.notify();
             }
 
         }
+    }
+
+    public List<JSONObject> getLPbyPage(int dataset_local_id,int startIndex){
+        int database_dataset_local_id = dataset_local_id;
+        int table_id=2;
+        if(dataset_local_id>311){
+            table_id=3;
+            database_dataset_local_id-=311;
+        }
+        List<JSONObject> result = new ArrayList<>();
+
+        List<JSONObject> fromResult = new ArrayList<>();
+        List<JSONObject> toResult = new ArrayList<>();
+
+        //一次请求50个
+        try {
+            Directory directory = FSDirectory.open(Paths.get(GlobalVariances.lpDir+dataset_local_id));//打开索引文件夹
+            IndexReader reader = DirectoryReader.open(directory);//读取目录
+            IndexSearcher searcherForLP = new IndexSearcher(reader);
+            //TODO sort
+            SortField sortField = new SortField("count",SortField.Type.INT,true);
+            Sort sort = new Sort(sortField);
+
+            TopDocs tds = searcherForLP.search(new MatchAllDocsQuery(),500000,sort);
+
+            int end = 50*((startIndex/50)+1);
+            //一个pattern一个document
+            for(int i=startIndex;i<min(end,tds.scoreDocs.length);i++){//从0开始从1开始？？？？
+                JSONObject resultOne = new JSONObject();
+
+                Document doc = searcherForLP.doc(tds.scoreDocs[i].doc);
+
+                int propertyID = Integer.parseInt(doc.get("propertyID"));
+                String count = doc.get("count");
+
+                JSONObject onePattern = new JSONObject();
+                List<JSONObject> children = new ArrayList<>();
+
+                String strFromInProperty = doc.get("fromInProperty");
+                if(strFromInProperty.length()!=0){
+                    String [] fromInProperty = strFromInProperty.trim().split(" ");
+                    for(int j=0;j<fromInProperty.length;j++){
+
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(fromInProperty[j])));
+                        jsonObject.put("type",0);
+                        jsonObject.put("inOrOut",0);
+
+                        children.add(jsonObject);
+                    }
+                }
+
+                String strFromOutProperty = doc.get("fromOutProperty");
+                if(strFromOutProperty.length()!=0){
+                    String [] fromOutProperty = strFromOutProperty.trim().split(" ");
+                    for(int j=0;j<fromOutProperty.length;j++){
+                        if(Integer.parseInt(fromOutProperty[j])==propertyID) continue;
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(fromOutProperty[j])));
+                        jsonObject.put("type",0);
+                        jsonObject.put("inOrOut",1);
+
+                        children.add(jsonObject);
+
+                    }
+                }
+
+                String strFromClasses = doc.get("fromClasses");
+                if(strFromClasses.length()!=0){
+                    String [] fromClasses = strFromClasses.trim().split(" ");
+                    for(int j=0;j<fromClasses.length;j++){
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(fromClasses[j])));
+                        jsonObject.put("type",1);
+                        jsonObject.put("inOrOut",0);
+
+                        children.add(jsonObject);
+
+                    }
+
+                }
+                onePattern.put("children",children);
+//                        onePattern.put("name","pattern"+i);
+
+                fromResult.add(onePattern);
+
+
+                JSONObject twoPattern = new JSONObject();
+                List<JSONObject> children2 = new ArrayList<>();
+
+                String strToInProperty = doc.get("toInProperty");
+                if(strToInProperty.length()!=0){
+                    String [] toInProperty = strToInProperty.trim().split(" ");
+                    for(int j=0;j<toInProperty.length;j++){
+                        if(Integer.parseInt(toInProperty[j])==propertyID) continue;
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(toInProperty[j])));
+                        jsonObject.put("type",0);
+                        jsonObject.put("inOrOut",0);
+
+                        children2.add(jsonObject);
+
+                    }
+                }
+
+                String strToOutProperty = doc.get("toOutProperty");
+                if(strToOutProperty.length()!=0){
+                    String [] toOutProperty = strToOutProperty.trim().split(" ");
+                    for(int j=0;j<toOutProperty.length;j++){
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(toOutProperty[j])));
+                        jsonObject.put("type",0);
+                        jsonObject.put("inOrOut",1);
+
+                        children2.add(jsonObject);
+
+                    }
+                }
+
+                String strToClasses = doc.get("toClasses");
+                if(strToClasses.length()!=0){
+                    String [] toClasses = strToClasses.trim().split(" ");
+                    for(int j=0;j<toClasses.length;j++){
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(toClasses[j])));
+                        jsonObject.put("type",1);
+                        jsonObject.put("inOrOut",0);
+
+                        children2.add(jsonObject);
+
+                    }
+
+                }
+
+                twoPattern.put("children",children2);
+//                        twoPattern.put("name","pattern"+i);
+//                toResult.add(twoPattern);
+
+                resultOne.put("onePattern",onePattern);
+                resultOne.put("twoPattern",twoPattern);
+                resultOne.put("count",Integer.parseInt(count));
+                resultOne.put("property",sqlUtil.getLabelForId(table_id,dataset_local_id,propertyID));
+                result.add(resultOne);
+
+            }
+
+            for(int i=0;i<result.size();i++){
+                result.get(i).put("name","pattern"+(startIndex+i));
+            }
+
+            reader.close();//关闭资源
+            directory.close();//关闭连接
+        }catch(Exception e)    {
+            e.printStackTrace();
+        }
+
+        return result;
+
+    }
+
+    public List<JSONObject> getEDPbyPage(int dataset_local_id,int startIndex){
+        int database_dataset_local_id = dataset_local_id;
+        int table_id=2;
+        if(dataset_local_id>311){
+            table_id=3;
+            database_dataset_local_id-=311;
+        }
+
+        List<JSONObject> result = new ArrayList<>();
+        //一次请求50个
+        try {
+            Directory directory = FSDirectory.open(Paths.get(GlobalVariances.edpDir+dataset_local_id));//打开索引文件夹
+            IndexReader reader = DirectoryReader.open(directory);//读取目录
+            IndexSearcher searcherForEDP = new IndexSearcher(reader);
+            //TODO sort
+            SortField sortField = new SortField("count",SortField.Type.INT,true);
+            Sort sort = new Sort(sortField);
+            TopDocs tds = searcherForEDP.search(new MatchAllDocsQuery(),500000,sort);
+
+
+
+            int end = 50*((startIndex/50)+1);
+            //一个pattern一个document
+            for(int i=startIndex;i<min(end,tds.scoreDocs.length);i++){//从0开始从1开始？？？？
+                JSONObject onePattern = new JSONObject();
+                List<JSONObject> children = new ArrayList<>();
+
+                Document doc = searcherForEDP.doc(tds.scoreDocs[i].doc);
+                //只有一项和空length都为1
+                String strOutProperty = doc.get("outProperty");
+                if(strOutProperty.length()!=0){
+                    String [] outProperty = strOutProperty.trim().split(" ");
+                    for(int j=0;j<outProperty.length;j++){
+                        JSONObject jsonObject = new JSONObject();
+//                        System.out.println(outProperty[j]);
+                        String name = sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(outProperty[j]));
+                        jsonObject.put("name",name);
+
+                        jsonObject.put("type",0);
+                        jsonObject.put("inOrOut",1);
+
+                        children.add(jsonObject);
+
+                    }
+                }
+
+                String strInProperty = doc.get("inProperty");
+                if(strInProperty.length()!=0){
+                    String [] inProperty = strInProperty.trim().split(" "); //很可能没有进入的或出去的
+
+                    for(int j=0;j<inProperty.length;j++){
+
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(inProperty[j])));
+                        jsonObject.put("type",0);
+                        jsonObject.put("inOrOut",0);
+
+                        children.add(jsonObject);
+
+                    }
+                }
+
+                String strClasses = doc.get("classes");
+                if(strClasses.length()!=0){
+                    String [] classes = strClasses.trim().split(" ");
+                    for(int j=0;j<classes.length;j++){
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("name",sqlUtil.getLabelForId(table_id,database_dataset_local_id,Integer.parseInt(classes[j])));
+                        jsonObject.put("type",1);
+                        jsonObject.put("inOrOut",1);
+
+                        children.add(jsonObject);
+
+                    }
+
+                }
+                onePattern.put("children",children);
+                String count = doc.get("count");
+                onePattern.put("count",Integer.parseInt(count));
+                result.add(onePattern);
+            }
+
+            for(int i=0;i<result.size();i++){
+                result.get(i).put("name","pattern"+(startIndex+i));
+            }
+
+            reader.close();//关闭资源
+            directory.close();//关闭连接
+        }catch(Exception e)    {
+            e.printStackTrace();
+        }
+
+
+        return result;
+
+    }
+
+    public List<List<JSONObject>> getClassAndProperty(){
+        synchronized (boolclassAndProperties){
+            try{
+                while(!boolclassAndProperties.get()){
+                    boolclassAndProperties.wait();
+                }
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        return classAndProperties;
+
     }
 
 
@@ -707,10 +1053,6 @@ public class Session {
         }
 
     }
-
-
-
-
 
     public List<Block> getResultList(String keyword,String[] organizations,String[] repostories,String[] licenses,String[] ins)throws ParseException, IOException{
         QueryParser parser_repo = new QueryParser("data_source",analyzer);
@@ -758,7 +1100,7 @@ public class Session {
         synchronized (boolbasicinfo){
             try{
                 while(!boolbasicinfo.get()){
-                    basicinfo.wait();
+                    boolbasicinfo.wait();
                 }
 
             }catch (Exception e){
@@ -773,14 +1115,14 @@ public class Session {
         synchronized (boolresources){
             try{
                 while(!boolresources.get()){
-                    resources.wait();
+                    boolresources.wait();
                 }
 
             }catch (Exception e){
                 e.printStackTrace();
             }
         }
-        logger.info("resource end!");
+
         return resources;
 
     }
@@ -790,7 +1132,7 @@ public class Session {
         synchronized (boolextras){
             try{
                 while(!boolextras.get()){
-                    extras.wait();
+                    boolextras.wait();
                 }
 
             }catch (Exception e){
@@ -805,7 +1147,7 @@ public class Session {
         synchronized (boolillustrativeList){
             try{
                 while(!boolillustrativeList.get()){
-                    illustrativeList.wait();
+                    boolillustrativeList.wait();
                 }
 
             }catch(InterruptedException e){
@@ -837,7 +1179,7 @@ public class Session {
         synchronized (booledpPatterns){
             try{
                 while(!booledpPatterns.get()){
-                    edpPatterns.wait();
+                    booledpPatterns.wait();
                 }
             }catch(Exception e){
                 e.printStackTrace();
@@ -852,7 +1194,7 @@ public class Session {
         synchronized (boollpPatterns){
             try{
                 while(!boollpPatterns.get()){
-                    lpPatterns.wait();
+                    boollpPatterns.wait();
                 }
 
             }catch(Exception e){
@@ -865,124 +1207,12 @@ public class Session {
 
 
 
-    public void getTopKClassAndProperty(Integer dataset_local_id){
-        int tableid = 2;
-        if(dataset_local_id>311){
-            tableid = 3;
-            dataset_local_id-=311;
-        }
-
-
-        String sql = String.format("SELECT * FROM class_count%d WHERE dataset_local_id=%d ORDER BY count DESC limit 10;",tableid,dataset_local_id);
-        try{
-            Connection connection = DemoApplication.secondDataSource.getConnection();
-            PreparedStatement pst = connection.prepareStatement(sql);
-            ResultSet rst = pst.executeQuery();
-
-            if(rst.next()){
-
-
-            }
-
-            rst.close();
-            pst.close();
-            connection.close();
-
-
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-
-
-
-    }
-
-    private String getPrefix(String uri,int table_id,int dataset_local_id){
-        String result = "";
-
-        try{
-            Directory directoryOne = FSDirectory.open(Paths.get("D:\\java.com.ltt.Index\\Namespace\\"+table_id+"\\"+dataset_local_id));//索引目录对象
-            IndexReader reader = DirectoryReader.open(directoryOne);//索引读取工具
-            IndexSearcher searcher = new IndexSearcher(reader);//索引搜索工具
-
-            TermQuery query = new TermQuery(new Term("vocabulary",uri));
-
-            TopDocs topDocs = searcher.search(query,100);
-            // 获取总条数
-//            System.out.println("本次搜索共找到" + topDocs.totalHits + "条数据");
-            // 获取得分文档对象（ScoreDoc）数组.SocreDoc中包含：文档的编号、文档的得分
-            ScoreDoc[] scoreDocs = topDocs.scoreDocs;
-            for (ScoreDoc scoreDoc : scoreDocs) {
-                // 取出文档编号
-                int docID = scoreDoc.doc;
-                // 根据编号去找文档
-                Document doc = reader.document(docID);
-                result = doc.get("prefix");
-//                System.out.println(result);
-
-            }
-            directoryOne.close();
-            reader.close();
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-
-
-        return result;
-    }
-
-    //需要每一个entity独立去查property
-    private Set<String> getEntity(String ss,String field1,String field2,String indexPath){
-
-
-
-        Set<String> entities = new HashSet<>();
-        try{
-            Directory directoryOne = FSDirectory.open(Paths.get(indexPath));//索引目录对象
-            IndexReader reader = DirectoryReader.open(directoryOne);//索引读取工具
-            IndexSearcher searcher = new IndexSearcher(reader);//索引搜索工具
-
-            QueryParser parser = new QueryParser(field1,new StandardAnalyzer());
-
-            Query query = parser.parse(ss.trim());
-
-            TopDocs topDocs = searcher.search(query,100);
-            // 获取总条数
-            System.out.println("本次搜索共找到" + topDocs.totalHits + "条数据");
-            // 获取得分文档对象（ScoreDoc）数组.SocreDoc中包含：文档的编号、文档的得分
-            ScoreDoc[] scoreDocs = topDocs.scoreDocs;
-            for (ScoreDoc scoreDoc : scoreDocs) {
-                // 取出文档编号
-                int docID = scoreDoc.doc;
-                // 根据编号去找文档
-                Document doc = reader.document(docID);
-                String ids = doc.get(field2);
-                //搜出来是entity的话，应该单个加入
-                String id[] = ids.trim().split(" ");
-                for(String ii:id){
-                    entities.add(ii);
-                }
-
-            }
-            directoryOne.close();
-            reader.close();
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        return entities;
-
-    }
-
-
-
 
     public List<JSONObject> getExoLOD2(){
         synchronized (boolexpLOD){
             try{
                 while(!boolexpLOD.get()){
-                    expLOD.wait();
+                    boolexpLOD.wait();
                 }
             }catch(Exception e){
                 e.printStackTrace();
@@ -1019,10 +1249,9 @@ public class Session {
     }
 
     /** ABCD **/
-    public Statistics getStatistics(Integer dataset_local_id){
-        Statistics statistics = new Statistics();
-        List<JSONObject> jsonClass = new ArrayList<>();
-        List<JSONObject> jsonProperty = new ArrayList<>();
+    public ModelAndView getStatistics(Integer dataset_local_id){
+        ModelAndView modelAndView= new ModelAndView();
+
 
 
         int database_id = dataset_local_id;
@@ -1032,78 +1261,97 @@ public class Session {
             database_id-=311;
         }
 
-
-
-        String class_sql = String.format("SELECT * FROM class_count%d WHERE dataset_local_id=%d ORDER BY count DESC",tableid,database_id);
-        String property_sql = String.format("SELECT * FROM property_count%d WHERE dataset_local_id=%d ORDER BY count DESC",tableid,database_id);
-
-
-        int classSum = getClassCount("class",tableid,database_id);
-        int propertySum = getClassCount("property",tableid,database_id);
-
         try{
-            Connection conn_remote = DemoApplication.secondDataSource.getConnection();
-            Statement class_pst = conn_remote.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-                    ResultSet.CONCUR_UPDATABLE);
-            ResultSet class_rst = class_pst.executeQuery(class_sql);
 
-            int classSumSelect = 10;
-            int classClock =0;
+            Connection connection_remote = DemoApplication.primaryDataSource.getConnection();
+            String sql = String.format("SELECT * FROM dataset%d WHERE local_id=%d;",tableid,database_id);
+            PreparedStatement pst = connection_remote.prepareStatement(sql);
+            ResultSet rst = pst.executeQuery();
 
-            int class_id=0;
-            while (class_rst.next()){
-                classClock++;
-                class_id = class_rst.getInt("class_id");
-                List<String> tmp = sqlUtil.getURIAndLabelForId(tableid,database_id,class_id);
+            while(rst.next()){
+                basicinfo.put("author",rst.getString("author")==null?"":rst.getString("author"));
+                basicinfo.put("author_email",rst.getString("author_email"));
+                basicinfo.put("metadata_created",rst.getString("metadata_created").substring(0,10));
+                basicinfo.put("maintainer",rst.getString("maintainer"));
+                basicinfo.put("maintainer_email",rst.getString("maintainer_email"));
+                basicinfo.put("name",rst.getString("name"));
+                basicinfo.put("metadata_modified",rst.getString("metadata_modified").substring(0,10));
+                basicinfo.put("notes",rst.getString("notes"));
+                basicinfo.put("org_title",rst.getString("org_title"));
+                basicinfo.put("title",rst.getString("title"));
+                basicinfo.put("state",rst.getString("state"));
+                basicinfo.put("num_tags",rst.getString("num_tags"));
+                basicinfo.put("creator_user_id",rst.getString("creator_user_id"));
+                basicinfo.put("org_approval_status",rst.getString("org_approval_status"));
+                basicinfo.put("org_created",rst.getString("org_created"));
+                basicinfo.put("org_state",rst.getString("org_state"));
+                basicinfo.put("org_description",rst.getString("org_description"));
+                basicinfo.put("revision_id",rst.getString("revision_id"));
+                basicinfo.put("org_image_url",rst.getString("org_image_url"));
+                basicinfo.put("version",rst.getString("version"));
+                basicinfo.put("org_revision_id",rst.getString("org_revision_id"));
+                basicinfo.put("license_title",rst.getString("license_title"));
+                basicinfo.put("license_id",rst.getString("license_id"));
+            }
+            rst.close();pst.close();
 
 
+            String sql_resource = String.format("SELECT * FROM resource%d WHERE dataset_local_id=%d;",tableid,database_id);
+            PreparedStatement pstt = connection_remote.prepareStatement(sql_resource);
+            ResultSet rstt = pstt.executeQuery();
+            while(rstt.next()){
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("name",tmp.get(1));
-                jsonObject.put("uri",tmp.get(0));
-                jsonObject.put("value",(double)class_rst.getInt("count")/classSum);
-                jsonClass.add(jsonObject);
+                jsonObject.put("mimetype",rstt.getString("mimetype"));
+                jsonObject.put("cache_url",rstt.getString("cache_url"));
+                jsonObject.put("hash",rstt.getString("hash"));
+                jsonObject.put("description",rstt.getString("description"));
+                jsonObject.put("name",rstt.getString("name"));
+                jsonObject.put("format",rstt.getString("format"));
+                jsonObject.put("url",rstt.getString("url"));
+                jsonObject.put("cache_last_updated",rstt.getString("cache_last_updated"));
+                jsonObject.put("package_id",rstt.getString("package_id"));
+                jsonObject.put("created",rstt.getString("created"));
+                jsonObject.put("state",rstt.getString("state"));
+                jsonObject.put("mimetype_inner",rstt.getString("mimetype_inner"));
+                jsonObject.put("last_modified",rstt.getString("last_modified"));
+                jsonObject.put("position",rstt.getString("position"));
+                jsonObject.put("revision_id",rstt.getString("revision_id"));
+                jsonObject.put("url_type",rstt.getString("url_type"));
+                jsonObject.put("resource_type",rstt.getString("resource_type"));
+                jsonObject.put("downloaded",rstt.getString("downloaded"));
+                jsonObject.put("data_source",rstt.getString("data_source"));
 
-                if(classClock>classSumSelect){
-                    break;
+                resources.add(jsonObject);
+
+            }
+
+            rstt.close();pstt.close();
+
+
+            String sql_extra = String.format("SELECT * FROM extra%d WHERE dataset_local_id=%d;",tableid,database_id);
+            PreparedStatement psttt = connection_remote.prepareStatement(sql_extra);
+            ResultSet rsttt = psttt.executeQuery();
+
+
+            while(rsttt.next()){
+
+                String key = rsttt.getString("key");
+                if(!"links".equals(key.substring(0,5))){
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("id",key);
+                    jsonObject.put("value",rsttt.getString("value"));
+                    extras.add(jsonObject);
                 }
 
-
-            }
-//            System.out.println(jsonClass);
-            statistics.setClassDis(jsonClass);
-
-
-
-            Statement property_pst = conn_remote.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-                    ResultSet.CONCUR_UPDATABLE);
-            ResultSet property_rst = property_pst.executeQuery(property_sql);
-            int propertySumSelect =10;
-            if(propertySumSelect>GlobalVariances.MAX_CLASS_PROPERTY){
-                propertySumSelect = (int)Math.round(propertySumSelect * 0.2);
-            }else if(propertySumSelect<GlobalVariances.MAX_CLASS_PROPERTY && propertySumSelect>GlobalVariances.MIN_CLASS_PROPERTY){
-                propertySumSelect = (int)Math.round(propertySumSelect * 0.6);
             }
 
-            int propertyClock = 0;
-            int property_id=0;
+            rsttt.close();psttt.close();
+            connection_remote.close();
 
-            while(property_rst.next()){
-                propertyClock++;
-
-                property_id = property_rst.getInt("property_id");
-
-                List<String> tmp = sqlUtil.getURIAndLabelForId(tableid,database_id,property_id);
+            modelAndView.addObject("extra",extras);
+            modelAndView.addObject("metadata",basicinfo);
 
 
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("name",tmp.get(1));
-                jsonObject.put("uri",tmp.get(0));
-                jsonObject.put("value",(double)property_rst.getInt("count")/propertySum);
-                jsonProperty.add(jsonObject);
-
-                if(propertyClock>propertySumSelect)break;
-            }
-            statistics.setPropertyDis(jsonProperty);
 
         }catch (Exception e){
             e.printStackTrace();
@@ -1118,18 +1366,21 @@ public class Session {
         Thread simple = new SimplePatternThread(tableid,database_id,dataset_local_id);
         simple.start();
 
+        Thread clsAndPre = new ClassAndPropertyThread(tableid,database_id,dataset_local_id);
+        clsAndPre.start();
 
 
 
 
-        Thread basicinfoTh = new BasicInfoThread(tableid,database_id,dataset_local_id);
-        basicinfoTh.start();
 
-        Thread resourceTh = new ResourceThread(tableid,dataset_local_id);
-        resourceTh.start();
-
-        Thread extraTh = new ExtraThread(tableid,dataset_local_id);
-        extraTh.start();
+//        Thread basicinfoTh = new BasicInfoThread(tableid,database_id,dataset_local_id);
+//        basicinfoTh.start();
+//
+//        Thread resourceTh = new ResourceThread(tableid,database_id);
+//        resourceTh.start();
+//
+//        Thread extraTh = new ExtraThread(tableid,database_id);
+//        extraTh.start();
 
 
         return statistics;

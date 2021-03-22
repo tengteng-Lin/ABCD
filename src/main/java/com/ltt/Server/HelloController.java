@@ -52,6 +52,18 @@ public class HelloController {
 
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/getLPbyPage",method = RequestMethod.GET)
+    public List<JSONObject> getLPbyPage(@RequestParam String session_id, @RequestParam String dataset_local_id,@RequestParam int startIndex){
+        return ServerMain.getInstance().getLPbyPage(session_id,Integer.parseInt(dataset_local_id),startIndex);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/getEDPbyPage",method = RequestMethod.GET)
+    public List<JSONObject> getEDPbyPage(@RequestParam String session_id, @RequestParam String dataset_local_id,@RequestParam int startIndex){
+        return ServerMain.getInstance().getEDPbyPage(session_id,Integer.parseInt(dataset_local_id),startIndex);
+    }
+
 
 
     @ResponseBody
@@ -90,6 +102,13 @@ public class HelloController {
     @RequestMapping(value = "/getExpLOD",method = RequestMethod.GET)
     public List<JSONObject> getExpLOD(@RequestParam String session_id, @RequestParam String dataset_local_id){
         return ServerMain.getInstance().getExpLOD(session_id,Integer.parseInt(dataset_local_id));
+
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/getclassANDproperty",method = RequestMethod.GET)
+    public List<List<JSONObject>> getClassAndProperty(@RequestParam String session_id, @RequestParam String dataset_local_id){
+        return ServerMain.getInstance().getClassAndProperty(session_id);
 
     }
 
