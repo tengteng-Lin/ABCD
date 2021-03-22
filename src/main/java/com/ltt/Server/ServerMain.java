@@ -98,9 +98,7 @@ public class ServerMain {
 
     /** ABCD **/
     public ModelAndView getAOverView(String session_id,Integer dataset_local_id){
-        Statistics statistics = sessionMap.get(session_id).getStatistics(dataset_local_id);
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.addObject("statistics",statistics);
+        ModelAndView modelAndView = sessionMap.get(session_id).getStatistics(dataset_local_id);
         modelAndView.addObject("session_id",session_id);
         modelAndView.addObject("dataset_local_id",dataset_local_id);
         modelAndView.setViewName("A-overview.html");

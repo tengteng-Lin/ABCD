@@ -40,7 +40,7 @@ public class DataSourceConfig {
         logger.info("remote DataSource init！");
         HikariDataSource ss = (HikariDataSource) firstDataSourceProperties().initializeDataSourceBuilder().build();
         ss.setMaximumPoolSize(200);
-        System.out.println(ss.getMaximumPoolSize());
+//        System.out.println(ss.getMaximumPoolSize());
         ss.setIdleTimeout(60000);
         ss.setConnectionTimeout(30000);
         ss.setMaxLifetime(200000);

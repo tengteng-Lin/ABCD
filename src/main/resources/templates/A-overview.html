@@ -156,11 +156,12 @@
 
             <ul>
 
-                <li class="active"><a href="javascript:void(0);" onclick="changeBar('classANDproperty')"> Class & Property </a></li>
+                <li class="active"><a href="javascript:void(0);" onclick="changeBar('metadata')"> Metadata </a></li>
+                <li ><a href="javascript:void(0);" onclick="changeBar('classANDproperty')"> Class & Property </a></li>
                 <li><a href="javascript:void(0);" onclick="changeBar('patterns')"> Data Patterns </a></li>
                 <!--<li><a href="javascript:void(0);" onclick="changeBar('samples')"> Data Samples </a></li>-->
                 <!--<li><a href="javascript:void(0);" onclick="changeBar('explore')"> Explore </a></li>-->
-                <li><a href="javascript:void(0);" onclick="changeBar('metadata')"> Metadata </a></li>
+
 
             </ul>
         </div>
@@ -230,7 +231,7 @@
                         <img src="/images/loadding.gif" style="margin-left: 50%;" id="metadataloading">
 
 
-                        <span id="basicinfo" style="display: none">
+                        <span id="basicinfo" style="display: block">
                             <div class="panel panel-default m-t-15" >
                             <div class="panel-heading">basic info</div>
                             <div class="panel-body" style="height: 100%;overflow-y: auto">
@@ -250,12 +251,12 @@
                                     </tr>
                                     <tr >
                                         <td>Metadata_created</td>
-                                        <td style="text-align: left"  th:text="${metadata.created_time}"></td>
+                                        <td style="text-align: left"  th:text="${metadata.metadata_created}"></td>
                                         <!--<td style="text-align: left" th:case="null">111</td>-->
                                     </tr>
                                     <tr >
                                         <td>Metadata_modified</td>
-                                        <td style="text-align: left" th:text="${metadata.modified_time}"></td>
+                                        <td style="text-align: left" th:text="${metadata.metadata_modified}"></td>
                                         <!--<td style="text-align: left" th:case="null" >1111</td>-->
                                     </tr>
                                     <tr th:switch="${#strings.isEmpty(metadata.author)}">
@@ -283,9 +284,9 @@
                                         <td style="text-align: left" th:case="false" th:text="${metadata.org_title}"></td>
                                         <td style="text-align: left" th:case="true"></td>
                                     </tr>
-                                    <tr th:switch="${#strings.isEmpty(metadata.license)}">
+                                    <tr th:switch="${#strings.isEmpty(metadata.license_title)}">
                                         <td>License</td>
-                                        <td style="text-align: left" th:case="false" th:text="${metadata.license}"></td>
+                                        <td style="text-align: left" th:case="false" th:text="${metadata.license_title}"></td>
                                         <td style="text-align: left" th:case="true"></td>
                                     </tr>
                                     <tr th:switch="${#strings.isEmpty(metadata.state)}">
@@ -368,6 +369,14 @@
                             <div class="panel panel-default m-t-15" >
                             <div class="panel-heading">resources</div>
                             <div class="panel-body needData" style="height:500px;overflow-y: auto" id="resourceID">
+                                <table class="table table-responsive" th:each="r,rStat: ${resource}" >
+                                    <thead >
+                                    <tr >
+                                        <th style="font-weight: bold;">Feature</th>
+                                        <th style="text-align: left;font-weight: bold;">Value</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
                                 <tr>
                                         <td>mimetype</td>
                                         <td style="text-align: left" th:text="${r.mimetype}"></td>
@@ -444,6 +453,8 @@
                                         <td>data_source</td>
                                         <td style="text-align: left" th:text="${r.data_source}"></td>
                                     </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                         </span>
@@ -492,6 +503,8 @@
 
                     </ul>
                     <div id="content" class="content">
+                        <img src="/images/loadding.gif" style="margin-left: 50%" id="classANDpropertyloading">
+
                     <span id="statistics" style="display: block;">
 
                         <div class="panel panel-default m-t-15">
@@ -508,12 +521,7 @@
                                 </thead>
 
                                 <tbody style="display:block;height:300px;overflow-y:auto;" class="needData" id="classtBody"></tbody>
-<!--                        <tr style="width:20%;cursor:pointer" th:each="r,rStat: ${statistics.classDis}">-->
 
-<!--                                    <td style="width:20%;text-align: left;" th:text="${r.uri}"></td>-->
-<!--                                    <td style="width:20%;text-align: left;" th:text="${r.name}"></td>-->
-<!--                                    <td style="width:20%;text-align: left;" th:text="${r.value}"></td>-->
-<!--                                </tr>-->
                             </table>
 
 
@@ -533,13 +541,7 @@
                                     </thead>
 
                                     <tbody style="display:block;height:300px;overflow-y:scroll;" class="needData" id="propertytBody"></tbody>
-<!--                            <tr style="width:20%;cursor:pointer" th:each="r,rStat: ${statistics.propertyDis}">-->
 
-<!--                                        <td style="width:20%;text-align: left;" th:text="${r.uri}"></td>-->
-<!--                                        <td style="width:20%;text-align: left;"-->
-<!--                                            th:text="${r.name}"></td>-->
-<!--                                        <td style="width:20%;text-align: left;" th:text="${r.value}"></td>-->
-<!--                                    </tr>-->
                                 </table>
 
 
@@ -947,13 +949,7 @@
                 })
 
             }
-            // <tr style="width:20%;cursor:pointer" th:each="r,rStat: ${statistics.propertyDis}">
-            //
-            //     <td style="width:20%;text-align: left;" th:text="${r.uri}"></td>
-            //     <td style="width:20%;text-align: left;"
-            //         th:text="${r.name}"></td>
-            //     <td style="width:20%;text-align: left;" th:text="${r.value}"></td>
-            // </tr>
+
             else if(element==='classANDproperty'){
                 $.ajax({
                     type:"get",
@@ -969,15 +965,36 @@
                     },
 
                     success:function (d){
+                        $("#classANDpropertyloading").fadeOut();
                         console.log(d)
                         var classText = ""
                         var propertyText = ""
 
+                        for(var i=0;i<d[0].length;i++){
+                            classText+='<tr style="width:20%;cursor:pointer">\n' +
+                                '\n' +
+                                '                                    <td style="width:20%;text-align: left;">'+d[0][i].uri+'</td>\n' +
+                                '                                    <td style="width:20%;text-align: left;">'+d[0][i].name+'</td>\n' +
+                                '                                    <td style="width:20%;text-align: left;">'+d[0][i].value+'</td>\n' +
+                                '                                </tr>'
+                        }
 
-                        $("#classANDpropertyloading").fadeOut();
+                        for(var i=0;i<d[1].length;i++){
+                            propertyText+='<tr style="width:20%;cursor:pointer">\n' +
+                                '\n' +
+                                '                <td style="width:20%;text-align: left;" >'+d[1][i].uri+'</td>\n' +
+                                '                <td style="width:20%;text-align: left;"\n' +
+                                '                    >'+d[1][i].name+'</td>\n' +
+                                '                <td style="width:20%;text-align: left;">'+d[1][i].value+'</td>\n' +
+                                '            </tr>'
+                        }
 
 
-                        $("#classtBody").html(innerText);
+
+
+
+                        $("#classtBody").html(classText);
+                        $("#propertytBody").html(propertyText);
                         $("#classANDproperty").fadeIn()
 
 
