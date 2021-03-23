@@ -9,7 +9,7 @@ import com.ltt.DemoApplication;
 import com.ltt.Model.Statistics.Statistics;
 import com.ltt.Utils.SpringContextUtil;
 import com.ltt.config.DataSourceConfig;
-
+import com.sun.org.apache.xpath.internal.operations.Mod;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -1252,10 +1252,6 @@ public class Session {
     public ModelAndView getStatistics(Integer dataset_local_id){
         ModelAndView modelAndView= new ModelAndView();
 
-        JSONObject basicinfo = new JSONObject();
-        List<JSONObject> resources = new ArrayList<>();
-        List<JSONObject> extras =  new ArrayList<>();
-
 
 
         int database_id = dataset_local_id;
@@ -1354,8 +1350,8 @@ public class Session {
 
             modelAndView.addObject("extra",extras);
             modelAndView.addObject("metadata",basicinfo);
-            modelAndView.addObject("resource",resources);
-            modelAndView.setViewName("A-overview.html");
+            modelAndView.addObject("")
+
 
 
 
@@ -1389,7 +1385,7 @@ public class Session {
 //        extraTh.start();
 
 
-        return modelAndView;
+        return statistics;
 
     }
 
