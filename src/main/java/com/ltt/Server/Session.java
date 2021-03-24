@@ -9,7 +9,7 @@ import com.ltt.DemoApplication;
 import com.ltt.Model.Statistics.Statistics;
 import com.ltt.Utils.SpringContextUtil;
 import com.ltt.config.DataSourceConfig;
-import com.sun.org.apache.xpath.internal.operations.Mod;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -126,6 +126,7 @@ public class Session {
 
             synchronized (boolclassAndProperties){
                 try{
+//                    logger.info("classANDproperty start!");
                     List<JSONObject> jsonClass = new ArrayList<>();
                     List<JSONObject> jsonProperty = new ArrayList<>();
 
@@ -134,7 +135,7 @@ public class Session {
                             ResultSet.CONCUR_UPDATABLE);
                     ResultSet class_rst = class_pst.executeQuery(class_sql);
 
-                    int classSumSelect = 20;
+                    int classSumSelect = 50;
                     int classClock =0;
 
                     int class_id=0;
@@ -160,12 +161,12 @@ public class Session {
                     Statement property_pst = conn_remote.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                             ResultSet.CONCUR_UPDATABLE);
                     ResultSet property_rst = property_pst.executeQuery(property_sql);
-                    int propertySumSelect =10;
-                    if(propertySumSelect>GlobalVariances.MAX_CLASS_PROPERTY){
-                        propertySumSelect = (int)Math.round(propertySumSelect * 0.2);
-                    }else if(propertySumSelect<GlobalVariances.MAX_CLASS_PROPERTY && propertySumSelect>GlobalVariances.MIN_CLASS_PROPERTY){
-                        propertySumSelect = (int)Math.round(propertySumSelect * 0.6);
-                    }
+                    int propertySumSelect =50;
+//                    if(propertySumSelect>GlobalVariances.MAX_CLASS_PROPERTY){
+//                        propertySumSelect = (int)Math.round(propertySumSelect * 0.2);
+//                    }else if(propertySumSelect<GlobalVariances.MAX_CLASS_PROPERTY && propertySumSelect>GlobalVariances.MIN_CLASS_PROPERTY){
+//                        propertySumSelect = (int)Math.round(propertySumSelect * 0.6);
+//                    }
 
                     int propertyClock = 0;
                     int property_id=0;
@@ -191,6 +192,7 @@ public class Session {
                     classAndProperties.add(jsonProperty);
                     boolclassAndProperties.set(true);
                     boolclassAndProperties.notify();
+//                    logger.info("classANDproperty end!");
 
                 }catch(Exception e){
                     e.printStackTrace();
@@ -1023,6 +1025,7 @@ public class Session {
         synchronized (boolclassAndProperties){
             try{
                 while(!boolclassAndProperties.get()){
+//                    logger.info(String.valueOf(boolclassAndProperties.get()));
                     boolclassAndProperties.wait();
                 }
 
@@ -1030,6 +1033,8 @@ public class Session {
                 e.printStackTrace();
             }
         }
+
+//        logger.info(String.valueOf(classAndProperties));
         return classAndProperties;
 
     }
@@ -1226,6 +1231,7 @@ public class Session {
     private int getClassCount(String type,int tableid,int dataset_local_id){
         String classSum_sql = String.format("SELECT sum(count) FROM %s_count%d WHERE dataset_local_id=%d",type,tableid,dataset_local_id);
 
+        int result =-1;
         try{
             Connection conn_remote = DemoApplication.secondDataSource.getConnection();
             Statement class_pst = conn_remote.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
@@ -1234,16 +1240,20 @@ public class Session {
 
 
             while (class_rst.next()){
-                return class_rst.getInt(1);
+                result =  class_rst.getInt(1);
+
 
             }
+            class_rst.close();
+            class_pst.close();
             conn_remote.close();
 
 
         }catch (Exception e){
             e.printStackTrace();
         }
-        return -1;
+//        logger.info(String.valueOf(result));
+        return result;
 
 
     }
@@ -1251,6 +1261,10 @@ public class Session {
     /** ABCD **/
     public ModelAndView getStatistics(Integer dataset_local_id){
         ModelAndView modelAndView= new ModelAndView();
+
+        JSONObject basicinfo = new JSONObject();
+        List<JSONObject> resources = new ArrayList<>();
+        List<JSONObject> extras =  new ArrayList<>();
 
 
 
@@ -1275,6 +1289,7 @@ public class Session {
                 basicinfo.put("maintainer",rst.getString("maintainer"));
                 basicinfo.put("maintainer_email",rst.getString("maintainer_email"));
                 basicinfo.put("name",rst.getString("name"));
+//                basicinfo.put("title",rst.getString("tiy"));
                 basicinfo.put("metadata_modified",rst.getString("metadata_modified").substring(0,10));
                 basicinfo.put("notes",rst.getString("notes"));
                 basicinfo.put("org_title",rst.getString("org_title"));
@@ -1328,30 +1343,32 @@ public class Session {
             rstt.close();pstt.close();
 
 
-            String sql_extra = String.format("SELECT * FROM extra%d WHERE dataset_local_id=%d;",tableid,database_id);
-            PreparedStatement psttt = connection_remote.prepareStatement(sql_extra);
-            ResultSet rsttt = psttt.executeQuery();
+            if(tableid==2){
+                String sql_extra = String.format("SELECT * FROM extra%d WHERE dataset_local_id=%d;",tableid,database_id);
+                PreparedStatement psttt = connection_remote.prepareStatement(sql_extra);
+                ResultSet rsttt = psttt.executeQuery();
 
 
-            while(rsttt.next()){
+                while(rsttt.next()){
 
-                String key = rsttt.getString("key");
-                if(!"links".equals(key.substring(0,5))){
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("id",key);
-                    jsonObject.put("value",rsttt.getString("value"));
-                    extras.add(jsonObject);
+                    String key = rsttt.getString("key");
+                    if(!"links".equals(key.substring(0,5))){
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("key",key);
+                        jsonObject.put("value",rsttt.getString("value"));
+                        extras.add(jsonObject);
+                    }
+
                 }
 
+                rsttt.close();psttt.close();
+                connection_remote.close();
             }
-
-            rsttt.close();psttt.close();
-            connection_remote.close();
 
             modelAndView.addObject("extra",extras);
             modelAndView.addObject("metadata",basicinfo);
-            modelAndView.addObject("")
-
+            modelAndView.addObject("resource",resources);
+            modelAndView.setViewName("A-overview.html");
 
 
 
@@ -1385,7 +1402,7 @@ public class Session {
 //        extraTh.start();
 
 
-        return statistics;
+        return modelAndView;
 
     }
 
@@ -1393,4 +1410,3 @@ public class Session {
 
 
 }
-

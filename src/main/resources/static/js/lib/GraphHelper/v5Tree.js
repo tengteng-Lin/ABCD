@@ -173,8 +173,8 @@ function showCluster(dataset,divID) {
         .append("path")
         .attr("class", "link")
         .attr("marker-start",function (dd,i) {
-            console.log("marker-start:")
-            console.log(dd)
+            // console.log("marker-start:")
+            // console.log(dd)
             if(dd.target.data.inOrOut===0) {
 
                 var arrowMarker = svg.append("marker")
@@ -215,8 +215,8 @@ function showCluster(dataset,divID) {
 
         })
         .attr("marker-end", function (dd, i) {
-            console.log("marker-end:")
-            console.log(dd)
+            // console.log("marker-end:")
+            // console.log(dd)
 
             if(dd.target.data.inOrOut===0) {
                 return;

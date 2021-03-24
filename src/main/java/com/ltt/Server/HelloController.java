@@ -76,7 +76,7 @@ public class HelloController {
     @ResponseBody
     @RequestMapping(value = "/getPAnDA",method = RequestMethod.GET)
     public List<JSONObject> getPattern(@RequestParam String session_id, @RequestParam String dataset_local_id){
-        System.out.println(session_id);
+//        System.out.println(session_id);
         return ServerMain.getInstance().getPattern(session_id,Integer.parseInt(dataset_local_id));
     }
 
@@ -106,8 +106,9 @@ public class HelloController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "/getclassANDproperty",method = RequestMethod.GET)
+    @RequestMapping(value = "/getclassproperty",method = RequestMethod.GET)
     public List<List<JSONObject>> getClassAndProperty(@RequestParam String session_id, @RequestParam String dataset_local_id){
+//        System.out.println("shoudao");
         return ServerMain.getInstance().getClassAndProperty(session_id);
 
     }

@@ -18,11 +18,11 @@ function showCluster3(data,data1,property,divID) {
     ]
 
     var lineColor_0 = "#CD9B1D"; //连线颜色
-    var lineColor_1 = "#2F4F4F"
-    var lineColor_2 = "#CD5C5C"
+    var lineColor_1 = "#2F4F4F" //class
+    var lineColor_2 = "#CD5C5C" //in
 
     // 树状图因为默认是上往下渲染的，改成从左往右渲染后会发现width和height都倒过来了，可以看具体参数的细节
-    let width = 520
+    let width = 700
     let height = 600
 
 
@@ -66,11 +66,11 @@ function showCluster3(data,data1,property,divID) {
 
     var g1 = svg
         .append("g")
-        .attr("transform", "rotate(180,180,120)translate(110,-150)scale(0.5)");
+        .attr("transform", "rotate(180,180,120)translate(50,-150)scale(0.5)");
 
     var g2 = svg
         .append("g")
-        .attr("transform", "translate(280,90)scale(0.5)");
+        .attr("transform", "translate(340,90)scale(0.5)");
 
     var hierarchyData = d3.hierarchy(data).sum(function(d) {
         return d.value;
@@ -135,8 +135,6 @@ function showCluster3(data,data1,property,divID) {
         .enter()
         .append("g")
         .attr("class", function (d,i) {
-            // console.log(d)
-
             if(i===0){
                 return "root"
             }
@@ -162,8 +160,6 @@ function showCluster3(data,data1,property,divID) {
         .append("path")
         .attr("class", "link")
         .attr("marker-start",function (dd,i) {
-            console.log("marker-start_11:")
-            console.log(dd)
             if(dd.target.data.inOrOut===0) {
 
                 var arrowMarker = svg.append("marker")
@@ -204,9 +200,6 @@ function showCluster3(data,data1,property,divID) {
 
         })
         .attr("marker-end", function (dd, i) {
-            console.log("marker-end:")
-            console.log(dd)
-
             if(dd.target.data.inOrOut===0) {
                 return;
 
@@ -231,11 +224,11 @@ function showCluster3(data,data1,property,divID) {
                     .attr("d", "M2,2 L10,6 L2,10 L6,6 L2,2")
                     .attr("fill", function () {
                         if (dd.target.data.type===0 || dd.source.data.type===0){
-                            if(dd.target.data.inOrOut===0 || dd.source.data.inOrOut===0){
-                                return lineColor_2
-                            }else{
+                            // if(dd.target.data.inOrOut===0 || dd.source.data.inOrOut===0){
+                            //     return lineColor_2
+                            // }else{
                                 return lineColor_0
-                            }
+                            // }
 
                         }else{
                             return lineColor_1
@@ -261,7 +254,7 @@ function showCluster3(data,data1,property,divID) {
         })
         .attr("d", function(d) {
             var start = { x: d.source.x, y: d.source.y };
-            var end = { x: d.target.x, y: d.target.y };
+            var end = { x: d.target.x, y: d.target.y-150 };
             return generator({ source: start, target: end });
         });
 
@@ -271,8 +264,7 @@ function showCluster3(data,data1,property,divID) {
         .append("path")
         .attr("class", "link")
         .attr("marker-start",function (dd,i) {
-            console.log("marker-start:")
-            console.log(dd)
+
             if(dd.target.data.inOrOut===0) {
 
                 var arrowMarker = svg.append("marker")
@@ -313,9 +305,6 @@ function showCluster3(data,data1,property,divID) {
 
         })
         .attr("marker-end", function (dd, i) {
-            console.log("marker-end:")
-            console.log(dd)
-
             if(dd.target.data.inOrOut===0) {
                 return;
 
@@ -335,9 +324,6 @@ function showCluster3(data,data1,property,divID) {
                     .attr("refY", 6)
                     .attr("orient", function () {
                         return "auto"
-
-
-
 
                     })
                     .append("svg:path")
@@ -363,7 +349,6 @@ function showCluster3(data,data1,property,divID) {
         })
         .attr("stroke",function (d){
             if(d.target.data.type===0 ){
-
                 if(d.target.data.inOrOut===0){
                     return lineColor_2
                 }else if(d.target.data.inOrOut===1){
@@ -377,7 +362,7 @@ function showCluster3(data,data1,property,divID) {
         })
         .attr("d", function(d) {
             var start = { x: d.source.x, y: d.source.y };
-            var end = { x: d.target.x, y: d.target.y };
+            var end = { x: d.target.x, y: d.target.y-150 };
             return generator({ source: start, target: end });
         });
 
@@ -394,7 +379,7 @@ function showCluster3(data,data1,property,divID) {
         .attr("dy", function (d) {
             return d.children ? 25:3
         })
-        .attr("transform", "rotate(180,18,120)translate(20,240)")
+        .attr("transform", "rotate(180,18,120)translate(170,240)")
         // .attr('transform', function (d) { return d.x < 180 ? null : 'rotate(270)' })
         .style("text-anchor", function(d) {
             return d.children ? "end" : "end";
@@ -416,6 +401,7 @@ function showCluster3(data,data1,property,divID) {
                 return 25
             }
         })
+        .attr("transform", "translate(-150,0)")
         .attr("font-size",17)
         .style("text-anchor", function(d) {
             return d.children ? "end" : "start";
@@ -425,7 +411,7 @@ function showCluster3(data,data1,property,divID) {
         });
 
     svg.append('g')
-        .attr("transform", "translate(200,180)scale(0.4)")
+        .attr("transform", "translate(260,180)scale(0.4)")
         .append("line")
         // .data(root)
         .attr("x1", function (d) {
@@ -446,7 +432,7 @@ function showCluster3(data,data1,property,divID) {
         .attr("marker-end","url(#arrowProperty)");
 
     svg.append('g')
-        .attr("transform", "translate(245,230)scale(0.6)")
+        .attr("transform", "translate(300,230)scale(0.6)")
         .append("text")
         .text(property)
         .data(root)

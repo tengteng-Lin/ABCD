@@ -157,7 +157,7 @@
             <ul>
 
                 <li class="active"><a href="javascript:void(0);" onclick="changeBar('metadata')"> Metadata </a></li>
-                <li ><a href="javascript:void(0);" onclick="changeBar('classANDproperty')"> Class & Property </a></li>
+                <li ><a href="javascript:void(0);" onclick="changeBar('classandproperty')"> Class & Property </a></li>
                 <li><a href="javascript:void(0);" onclick="changeBar('patterns')"> Data Patterns </a></li>
                 <!--<li><a href="javascript:void(0);" onclick="changeBar('samples')"> Data Samples </a></li>-->
                 <!--<li><a href="javascript:void(0);" onclick="changeBar('explore')"> Explore </a></li>-->
@@ -228,7 +228,7 @@
                     </ul>
 
                     <div  class="content">
-                        <img src="/images/loadding.gif" style="margin-left: 50%;" id="metadataloading">
+
 
 
                         <span id="basicinfo" style="display: block">
@@ -248,6 +248,16 @@
                                     <tr>
                                         <td>Name</td>
                                         <td style="text-align: left" th:text="${metadata.name}"></td>
+                                    </tr>
+                                    <tr th:switch="${#strings.isEmpty(metadata.title)}">
+                                        <td>Title</td>
+                                        <td style="text-align: left" th:case="false" th:text="${metadata.title}"></td>
+                                        <td style="text-align: left" th:case="true"></td>
+                                    </tr>
+                                    <tr th:switch="${#strings.isEmpty(metadata.notes)}">
+                                        <td>Description</td>
+                                        <td style="text-align: left" th:case="false" th:text="${metadata.notes}"></td>
+                                        <td style="text-align: left" th:case="true"></td>
                                     </tr>
                                     <tr >
                                         <td>Metadata_created</td>
@@ -495,28 +505,28 @@
 
 
 
-            <div id="classANDproperty" class="divTab" style="display: none">
+            <div id="classandproperty" class="divTab" style="display: none">
                 <div id="containTab" class="containTab">
                     <ul id="tabs" class="tabs">
-                        <li  class="current"><a  href="javascript:void(0);" onclick="getContent('overview',this)" title="statistics">statistics</a></li>
+                        <li  class="current"><a  href="javascript:void(0);" onclick="getContent('classANDproperty',this)" title="statistics">statistics</a></li>
                         <!--<li ><a href="javascript:void(0);" onclick="getContent('overview',this)" title="namespace">namespace</a></li>-->
 
                     </ul>
                     <div id="content" class="content">
                         <img src="/images/loadding.gif" style="margin-left: 50%" id="classANDpropertyloading">
 
-                    <span id="statistics" style="display: block;">
+                        <span id="statistics" style="display: block;">
 
                         <div class="panel panel-default m-t-15">
-                <div class="panel-heading">Class</div>
+                <div class="panel-heading">Class-Top20</div>
                 <div class="panel-body">
-                    <table class="table table-responsive table-hover needData">
+                    <table class="table table-responsive table-hover ">
                                 <thead>
                                 <tr style="display:block">
 
                                     <th style="width:52%;text-align: left;font-weight: bold">URI</th>
                                         <th style="width:42%;text-align: left;font-weight: bold">Label</th>
-                                        <th style="width:20%;text-align: left;font-weight: bold">Count</th>
+                                        <th style="width:20%;text-align: left;font-weight: bold">Frequency</th>
                                 </tr>
                                 </thead>
 
@@ -528,7 +538,7 @@
                 </div>
             </div>
                         <div class="panel panel-default m-t-15">
-                    <div class="panel-heading">Property</div>
+                    <div class="panel-heading">Property-Top20</div>
                     <div class="panel-body">
                         <table class="table table-responsive table-hover ">
                                     <thead>
@@ -536,7 +546,7 @@
 
                                         <th style="width:52%;text-align: left;font-weight: bold">URI</th>
                                         <th style="width:42%;text-align: left;font-weight: bold">Label</th>
-                                        <th style="width:20%;text-align: left;font-weight: bold">Count</th>
+                                        <th style="width:20%;text-align: left;font-weight: bold">Frequency</th>
                                     </tr>
                                     </thead>
 
@@ -560,8 +570,8 @@
                 <div class="containTab">
                     <ul class="tabs">
                         <!--<li id="current"><a href="#" title="tab1">TOP-K</a></li>-->
-                        <li  class="current"><a href="javascript:void(0);" onclick="getContent('patterns',this)" title="PAnDA">PAnDA+</a></li>
-                        <li ><a  href="javascript:void(0);" onclick="getContent('patterns',this)" title="EDP">EDP</a></li>
+<!--                        <li  class="current"><a href="javascript:void(0);" onclick="getContent('patterns',this)" title="PAnDA">PAnDA+</a></li>-->
+                        <li class="current"><a  href="javascript:void(0);" onclick="getContent('patterns',this)" title="EDP">EDP</a></li>
                         <li ><a href="javascript:void(0);" onclick="getContent('patterns',this)" title="LP">LP</a></li>
 
                     </ul>
@@ -569,66 +579,6 @@
                     <div  class="content">
                         <img src="/images/loadding.gif" style="margin-left: 50%" id="patternsloading">
 
-
-                        <span id="PAnDA" style="display: none">
-                        <div class="panel panel-default m-t-15" id="description">
-                            <div class="panel-heading">description</div>
-                            <div class="panel-body">This is a dataset to describe</div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <div class="panel panel-default m-t-15" id="patternList">
-                                    <div class="panel-heading">pattern list</div>
-                                    <div class="panel-body">
-                                        <table class="table table-responsive">
-                                            <thead>
-
-                                    <tr style="display:block;">
-
-                                        <th style="width:20%;">pattern</th>
-                                        <th style="width:20%;text-align: left">count</th>
-
-                                    </tr>
-
-                                    </thead>
-
-                                            <tbody style="display:block;height:195px;overflow-y:auto;" class="needData"></tbody>
-                                        </table>
-                                     </div>
-                                </div>
-
-                            </div>
-
-                            <div class="col-lg-8">
-                        <div class="panel panel-default m-t-15">
-                            <div class="panel-heading">pattern graph</div>
-                            <div class="panel-body" >
-                                <div class="col-lg-1" >
-                                    <button class="btn-outline btn-rounded" onclick="nextOne(-1,'divP')" style="margin-top: 150px">back</button>
-
-                                </div>
-
-                                <div class="col-lg-10" id="divP">
-
-                                </div>
-
-                                <div class="col-lg-1" >
-                                    <button class="btn-outline btn-rounded" onclick="nextOne(1,'divP')" style="margin-top: 150px">next</button>
-
-                                </div>
-
-                            </div>
-                        </div>
-
-                    </div>
-
-
-
-                </div>
-
-
-                    </span>
 
                         <span id="EDP" style="display: none;">
                         <div class="panel panel-default m-t-15">
@@ -900,10 +850,11 @@
 
 
     function changeBar(element){
+        console.log(element)
         $(".divTab").hide()
 
         var changeTabText = $("#"+element+" .needData").html()
-        // console.log(changeTabText)
+        console.log(changeTabText)
 
         if(changeTabText==''){
             if(element==='patterns'){
@@ -921,26 +872,30 @@
                     },
 
                     success:function (d){
-                        divP = d
+                        var innerText = ''
+                        for (var i=0;i<d.length;i++){
+                            innerText+='<tr >\n' +
+                                ' <td \n' +
+                                ' onclick=showGraph('+i+',"divEDP")' +
+                                ' style="width:20%;cursor:pointer">'+d[i].name+'</td>\n' +
+                                ' <td style="width:20%;text-align: left" >'+d[i].count+'</td>\n' +
+                                ' </tr>'
+                        }
 
-                            //添加形式不一样，有的是表格，有的是列表
-                            var innerText = ''
-                            for (var i=0;i<d.length;i++){
-                                innerText+='<tr >\n' +
-                                    ' <td \n' +
-                                    ' onclick=showGraph('+i+',"divP")' +
-                                    ' style="width:20%;cursor:pointer">'+d[i].name+'</td>\n' +
-                                    ' <td style="width:20%;text-align: left" >'+d[i].count+'</td>\n' +
-                                    ' </tr>'
-                            }
-
-                            $("#patternsloading").fadeOut()
-                            $('#PAnDA .needData').html(innerText)
-                            $("#PAnDA").fadeIn()
-                        idx_simple_pattern=0
+                        $('#' + $(element).attr('title')+' .needData').html(innerText)
+                        // sessionStorage.setItem("divEDP",JSON.stringify(d))
+                        divEDP = d
+                        idx_EDP=0
+                        edpSliceIndex = d.length
+                        showCluster(d[0],"divEDP")
 
 
-                        showCluster(d[idx_simple_pattern],"divP")
+
+                        $("#patternsloading").fadeOut()
+                        $('#EDP .needData').html(innerText)
+                        $("#EDP").fadeIn()
+
+
 
                     },
                     error:function (e){
@@ -950,11 +905,12 @@
 
             }
 
-            else if(element==='classANDproperty'){
+            else if(element==='classandproperty'){
+
                 $.ajax({
                     type:"get",
 
-                    url:"/getclassANDproperty",
+                    url:"/getclassproperty",
                     data:{
                         session_id:sessionStorage.getItem("session_id"),
                         dataset_local_id:sessionStorage.getItem("dataset_local_id"),
@@ -1051,39 +1007,39 @@
                 success:function (d){
                     $("#" + loadingstr + "loading").fadeOut()
 
-                    if($(element).attr('title')=="PAnDA"){
-                        //添加形式不一样，有的是表格，有的是列表
-                        var innerText = ''
-                        for (var i=0;i<d.length;i++){
-                            innerText+='<tr >\n' +
-                                ' <td \n' +
-                                ' onclick=showGraph('+i+',"divP")' +
-                                ' style="width:20%;cursor:pointer">'+d[i].name+'</td>\n' +
-                                ' <td style="width:20%;text-align: left" >'+d[i].count+'</td>\n' +
-                                ' </tr>'
-                        }
-                        // console.log(innerText)
-                        $('#' + $(element).attr('title')+' .needData').html(innerText)
-                    }
-                    else if($(element).attr('title')=="EDP"){
-                        var innerText = ''
-                        for (var i=0;i<d.length;i++){
-                            innerText+='<tr >\n' +
-                                ' <td \n' +
-                                ' onclick=showGraph('+i+',"divEDP")' +
-                                ' style="width:20%;cursor:pointer">'+d[i].name+'</td>\n' +
-                                ' <td style="width:20%;text-align: left" >'+d[i].count+'</td>\n' +
-                                ' </tr>'
-                        }
-
-                        $('#' + $(element).attr('title')+' .needData').html(innerText)
-                        // sessionStorage.setItem("divEDP",JSON.stringify(d))
-                        divEDP = d
-                        idx_EDP=0
-                        edpSliceIndex = d.length
-                        showCluster(d[0],"divEDP")
-                    }
-                    else if($(element).attr('title')=="LP"){
+                    // if($(element).attr('title')=="PAnDA"){
+                    //     //添加形式不一样，有的是表格，有的是列表
+                    //     var innerText = ''
+                    //     for (var i=0;i<d.length;i++){
+                    //         innerText+='<tr >\n' +
+                    //             ' <td \n' +
+                    //             ' onclick=showGraph('+i+',"divP")' +
+                    //             ' style="width:20%;cursor:pointer">'+d[i].name+'</td>\n' +
+                    //             ' <td style="width:20%;text-align: left" >'+d[i].count+'</td>\n' +
+                    //             ' </tr>'
+                    //     }
+                    //     // console.log(innerText)
+                    //     $('#' + $(element).attr('title')+' .needData').html(innerText)
+                    // }
+                    // else if($(element).attr('title')=="EDP"){
+                    //     var innerText = ''
+                    //     for (var i=0;i<d.length;i++){
+                    //         innerText+='<tr >\n' +
+                    //             ' <td \n' +
+                    //             ' onclick=showGraph('+i+',"divEDP")' +
+                    //             ' style="width:20%;cursor:pointer">'+d[i].name+'</td>\n' +
+                    //             ' <td style="width:20%;text-align: left" >'+d[i].count+'</td>\n' +
+                    //             ' </tr>'
+                    //     }
+                    //
+                    //     $('#' + $(element).attr('title')+' .needData').html(innerText)
+                    //     // sessionStorage.setItem("divEDP",JSON.stringify(d))
+                    //     divEDP = d
+                    //     idx_EDP=0
+                    //     edpSliceIndex = d.length
+                    //     showCluster(d[0],"divEDP")
+                    // }
+                    if($(element).attr('title')=="LP"){
                         var innerText = ''
                         for (var i=0;i<d.length;i++){
                             innerText+='<tr >\n' +
@@ -1326,3 +1282,4 @@
 <script src="/js/scripts.js"></script>
 <script src="/js/lib/tabulous.js"></script>
 </body>
+</html>

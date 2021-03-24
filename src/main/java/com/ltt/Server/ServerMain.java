@@ -127,6 +127,7 @@ public class ServerMain {
     }
 
     public List<List<JSONObject>> getClassAndProperty(String session_id){
+//        System.out.println(sessionMap.get(session_id).getClassAndProperty());
         return sessionMap.get(session_id).getClassAndProperty();
     }
 
