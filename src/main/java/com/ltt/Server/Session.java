@@ -759,7 +759,7 @@ public class Session {
                     e.printStackTrace();
                 }
                 boollpPatterns.set(true);
-                logger.info("LP ends!");
+//                logger.info("LP ends!");
                 boollpPatterns.notify();
             }
 
