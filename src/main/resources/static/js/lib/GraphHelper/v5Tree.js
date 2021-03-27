@@ -1,4 +1,5 @@
 function showCluster(dataset,divID) {
+    // console.log(dataset)
     //定义legend
     legendProperty = [{
         "name":"out property",
@@ -17,9 +18,9 @@ function showCluster(dataset,divID) {
     ]
 
 
-    var lineColor_0 = "#CD9B1D"; //连线颜色
-    var lineColor_1 = "#2F4F4F"
-    var lineColor_2 = "#CD5C5C"
+    var outPropertyColor = "#CD9B1D"; //连线颜色
+    var classColor = "#2F4F4F"
+    var inPropertyColor = "#CD5C5C"
 
 
 
@@ -92,6 +93,8 @@ function showCluster(dataset,divID) {
 
     var nodes = treeData.descendants();
     var links = treeData.links();
+
+    console.log(links)
 
     var generator = d3
         .linkHorizontal()
@@ -195,18 +198,7 @@ function showCluster(dataset,divID) {
                     })
                     .append("svg:path")
                     .attr("d", "M10,2 L6,6 L10,10 L2,6 L10,2")
-                    .attr("fill", function () {
-                        if (dd.target.data.type===0 || dd.source.data.type===0){
-                            if(dd.target.data.inOrOut===0 || dd.source.data.inOrOut===0){
-                                return lineColor_2
-                            }else{
-                                return lineColor_0
-                            }
-
-                        }else{
-                            return lineColor_1
-                        }
-                    });
+                    .attr("fill", inPropertyColor);
 
                 return "url(#arrow_start" +divID+  i + ")";
             }
@@ -237,23 +229,19 @@ function showCluster(dataset,divID) {
                     .attr("refY", 6)
                     .attr("orient", function () {
                         return "auto"
-
-
-
-
                     })
                     .append("svg:path")
                     .attr("d", "M2,2 L10,6 L2,10 L6,6 L2,2")
                     .attr("fill", function () {
                         if (dd.target.data.type===0 || dd.source.data.type===0){
-                            if(dd.target.data.inOrOut===0 || dd.source.data.inOrOut===0){
-                                return lineColor_2
-                            }else{
-                                return lineColor_0
-                            }
+                            // if(dd.target.data.inOrOut===0 || dd.source.data.inOrOut===0){
+                            //     return inPropertyColor
+                            // }else{
+                                return outPropertyColor
+                            // }
 
                         }else{
-                            return lineColor_1
+                            return classColor
                         }
                     });
 
@@ -263,19 +251,18 @@ function showCluster(dataset,divID) {
 
 
         })
-        .attr("stroke",function (d){
+        .attr("stroke",function (dd){
 
 
-            if(d.target.data.type===0 || d.source.data.type===0){
-
-                if(d.target.data.inOrOut===0 || d.source.data.inOrOut===0){
-                    return lineColor_2
+            if (dd.target.data.type===0 || dd.source.data.type===0){
+                if(dd.target.data.inOrOut===0 || dd.source.data.inOrOut===0){
+                    return inPropertyColor
                 }else{
-                    return lineColor_0
+                    return outPropertyColor
                 }
-            }else{
 
-                return lineColor_1
+            }else{
+                return classColor
             }
 
         })

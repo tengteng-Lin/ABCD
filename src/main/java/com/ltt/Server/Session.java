@@ -46,8 +46,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -148,7 +152,8 @@ public class Session {
                         JSONObject jsonObject = new JSONObject();
                         jsonObject.put("name",tmp.get(1));
                         jsonObject.put("uri",tmp.get(0));
-                        jsonObject.put("value",(double)class_rst.getInt("count")/classSum);
+                        jsonObject.put("value",new BigDecimal(new DecimalFormat("#.00000").format((double)class_rst.getInt("count")*100/classSum), new MathContext(0,
+                                RoundingMode.HALF_UP)).toEngineeringString()+"%");
                         jsonClass.add(jsonObject);
 
                         if(classClock>classSumSelect){
@@ -182,7 +187,10 @@ public class Session {
                         JSONObject jsonObject = new JSONObject();
                         jsonObject.put("name",tmp.get(1));
                         jsonObject.put("uri",tmp.get(0));
-                        jsonObject.put("value",(double)property_rst.getInt("count")/propertySum);
+
+
+                        jsonObject.put("value",new BigDecimal(new DecimalFormat("#.00000").format((double)property_rst.getInt("count")*100/propertySum), new MathContext(0,
+                                RoundingMode.HALF_UP)).toEngineeringString()+"%");
                         jsonProperty.add(jsonObject);
 
                         if(propertyClock>propertySumSelect)break;
@@ -509,13 +517,15 @@ public class Session {
                     Directory directory = FSDirectory.open(Paths.get(GlobalVariances.edpDir+dataset_local_id));//打开索引文件夹
                     IndexReader reader = DirectoryReader.open(directory);//读取目录
                     IndexSearcher searcherForEDP = new IndexSearcher(reader);
+                    logger.info(String.valueOf(reader.maxDoc()));
+
                     //TODO sort
                     SortField sortField = new SortField("count",SortField.Type.INT,true);
                     Sort sort = new Sort(sortField);
                     TopDocs tds = searcherForEDP.search(new MatchAllDocsQuery(),500000,sort);
+                    logger.info(String.valueOf(tds.scoreDocs.length));
 
                     List<JSONObject> result = new ArrayList<>();
-
                     //一个pattern一个document
                     for(int i=0;i<min(50,tds.scoreDocs.length);i++){//从0开始从1开始？？？？
                         JSONObject onePattern = new JSONObject();
@@ -524,6 +534,7 @@ public class Session {
                         Document doc = searcherForEDP.doc(tds.scoreDocs[i].doc);
                         //只有一项和空length都为1
                         String strOutProperty = doc.get("outProperty");
+                        logger.info("out property:"+strOutProperty);
                         if(strOutProperty.length()!=0){
                             String [] outProperty = strOutProperty.trim().split(" ");
                             for(int j=0;j<outProperty.length;j++){
@@ -541,6 +552,7 @@ public class Session {
                         }
 
                         String strInProperty = doc.get("inProperty");
+                        logger.info("in property:"+strInProperty);
                         if(strInProperty.length()!=0){
                             String [] inProperty = strInProperty.trim().split(" "); //很可能没有进入的或出去的
 
@@ -557,6 +569,7 @@ public class Session {
                         }
 
                         String strClasses = doc.get("classes");
+                        logger.info("classes:"+strClasses);
                         if(strClasses.length()!=0){
                             String [] classes = strClasses.trim().split(" ");
                             for(int j=0;j<classes.length;j++){
@@ -574,8 +587,13 @@ public class Session {
                         String count = doc.get("count");
                         onePattern.put("count",Integer.parseInt(count));
                         onePattern.put("name","pattern"+i);
+
+//                        result.add(onePattern);
                         edpPatterns.add(onePattern);
                     }
+                    System.out.println(edpPatterns);
+
+
 
 
 

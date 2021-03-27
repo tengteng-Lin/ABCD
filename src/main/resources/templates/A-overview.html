@@ -245,10 +245,6 @@
                                     </tr>
                                     </thead>
                                     <tbody class="needData" id="basicinfotBody">
-                                    <tr>
-                                        <td>Name</td>
-                                        <td style="text-align: left" th:text="${metadata.name}"></td>
-                                    </tr>
                                     <tr th:switch="${#strings.isEmpty(metadata.title)}">
                                         <td>Title</td>
                                         <td style="text-align: left" th:case="false" th:text="${metadata.title}"></td>
@@ -259,6 +255,12 @@
                                         <td style="text-align: left" th:case="false" th:text="${metadata.notes}"></td>
                                         <td style="text-align: left" th:case="true"></td>
                                     </tr>
+
+                                    <tr>
+                                        <td>Name</td>
+                                        <td style="text-align: left" th:text="${metadata.name}"></td>
+                                    </tr>
+
                                     <tr >
                                         <td>Metadata_created</td>
                                         <td style="text-align: left"  th:text="${metadata.metadata_created}"></td>
@@ -518,19 +520,19 @@
                         <span id="statistics" style="display: block;">
 
                         <div class="panel panel-default m-t-15">
-                <div class="panel-heading">Class-Top20</div>
+                <div class="panel-heading">Top-20 Class</div>
                 <div class="panel-body">
                     <table class="table table-responsive table-hover ">
-                                <thead>
-                                <tr>
+                                <thead style="display:block;">
+                                <tr style="width:20%">
 
-                                    <th style="text-align: left;font-weight: bold">URI</th>
-                                        <th style="text-align: left;font-weight: bold">Label</th>
-                                        <th style="text-align: left;font-weight: bold">Frequency</th>
+                                    <th style="width:43%;text-align: left;font-weight: bold">IRI</th>
+                                        <th style="width:49%;text-align: left;font-weight: bold">Label</th>
+                                        <th style="width:20%;text-align: left;font-weight: bold">Frequency</th>
                                 </tr>
                                 </thead>
 
-                                <tbody style="height:300px;overflow-y:auto;" class="needData" id="classtBody"></tbody>
+                                <tbody style="display:block;height:300px;overflow-y:auto;" class="needData" id="classtBody"></tbody>
 
                             </table>
 
@@ -538,19 +540,19 @@
                 </div>
             </div>
                         <div class="panel panel-default m-t-15">
-                    <div class="panel-heading">Property-Top20</div>
+                    <div class="panel-heading">Top-20 Property</div>
                     <div class="panel-body">
                         <table class="table table-responsive table-hover ">
-                                    <thead>
-                                    <tr>
+                                    <thead style="display:block;">
+                                    <tr style="width:20%">
 
-                                        <th style="text-align: left;font-weight: bold">URI</th>
-                                        <th style="text-align: left;font-weight: bold">Label</th>
-                                        <th style="text-align: left;font-weight: bold">Frequency</th>
+                                        <th style="width:43%;text-align: left;font-weight: bold">IRI</th>
+                                        <th style="width:49%;text-align: left;font-weight: bold">Label</th>
+                                        <th style="width:20%;text-align: left;font-weight: bold">Frequency</th>
                                     </tr>
                                     </thead>
 
-                                    <tbody style="height:300px;overflow-y:scroll;" class="needData" id="propertytBody"></tbody>
+                                    <tbody style="display:block;height:300px;overflow-y:scroll;" class="needData" id="propertytBody"></tbody>
 
                                 </table>
 
@@ -583,13 +585,18 @@
                         <span id="EDP" style="display: none;">
                         <div class="panel panel-default m-t-15">
                     <div class="panel-heading">description</div>
-                    <div class="panel-body">This is a dataset to describe ……</div>
+                            <div class="panel-body">RDF数据集具有图结构，其中的点为实体（entity），类（class）或文本（literal），有向边描述它们之间的关系，每条有向边对应一个三元组（triple）。在RDF数据集中，每个实体关联到一组确定的边，这些边描述了实体的类以及与相邻实体的关系，构成了一种对这个实体的描述（Entity Description），实体描述是一个边（三元组）的集合，是与实体一一对应的。
+                                <br></br>
+实体描述模式（Entity Description Pattern，缩写为EDP），主要关注实体描述中出现的类和关系（或者叫属性，property），由三个集合组成，分别为类集（class），出关系集（out property），入关系集（in property）。通常来说，相似的不同实体可能具有相同的EDP，因为它们很可能有相同的类，与周围实体的关系也相似。
+                                <br></br>
+在RDF数据集中，出现频率较高的EDP通常描述大多数实体的特征，以下展示了此数据集中的高频EDP，图中不同颜色和箭头方向的边分别代表了类，出/入关系。
+</div>
                 </div>
 
                         <div class="row">
                     <div class="col-lg-4">
                         <div class="panel panel-default m-t-15">
-                            <div class="panel-heading">pattern list</div>
+                            <div class="panel-heading">EDP list by descending number of instances</div>
                             <div class="panel-body" style="display:block;height:515px;overflow-y:scroll;" id="EDPtable">
 
                                     <div>
@@ -624,7 +631,7 @@
 
                     <div class="col-lg-8">
                         <div class="panel panel-default m-t-15">
-                            <div class="panel-heading">pattern graph</div>
+                            <div class="panel-heading">EDP visualization</div>
                             <div class="panel-body">
                                 <div class="col-lg-1">
                                     <button class="btn btn-default btn-outline btn-rounded m-b-10"
@@ -659,14 +666,16 @@
                         <span id="LP" style="display: none;">
                         <div class="panel panel-default m-t-15">
                     <div class="panel-heading">description</div>
-                    <div class="panel-body">This is a dataset to describe</div>
+                    <div class="panel-body">在RDF数据集中，实体通过不同关系相连。EDP通常描述单个实体的特征，在此基础上，关联模式（Link Pattern，缩写为LP）主要关注相邻实体在数据集中如何关联。<br></br>
+LP主要由三部分组成，头EDP，尾EDP，以及由头指向尾的有向关系。每个LP对应数据集中的一些三元组，这些三元组符合以下要求：1，头实体具有头EDP；2，尾实体具有尾EDP；3，关系与LP中的关系一致。<br></br>
+以下展示了此数据集中的高频LP，左右两部分分别为头EDP和尾EDP，中间的边代表有向关系。</div>
 
                 </div>
 
                 <div class="row">
                     <div class="col-lg-4">
                         <div class="panel panel-default m-t-15">
-                            <div class="panel-heading">pattern list</div>
+                            <div class="panel-heading">LP list by descending number of instances</div>
                             <div class="panel-body" style="display:block;height:515px;overflow-y:scroll;" id="LPtable">
                                 <table class="table table-responsive">
                                     <thead>
@@ -692,7 +701,7 @@
 
                     <div class="col-lg-8">
                         <div class="panel panel-default m-t-15">
-                            <div class="panel-heading">pattern graph</div>
+                            <div class="panel-heading">LP visualization</div>
                             <div class="panel-body">
                                 <div class="col-lg-1">
                                     <button class="btn btn-default btn-outline btn-rounded m-b-10"
@@ -861,7 +870,7 @@
                 $.ajax({
                     type:"get",
 
-                    url:"/getPAnDA",
+                    url:"/getEDP",
                     data:{
                         session_id:sessionStorage.getItem("session_id"),
                         dataset_local_id:sessionStorage.getItem("dataset_local_id"),
@@ -927,21 +936,21 @@
                         var propertyText = ""
 
                         for(var i=0;i<d[0].length;i++){
-                            classText+='<tr style="cursor:pointer">\n' +
+                            classText+='<tr style="width:20%;cursor:pointer">\n' +
                                 '\n' +
-                                '                                    <td style="text-align: left;">'+d[0][i].uri+'</td>\n' +
-                                '                                    <td style="text-align: left;">'+d[0][i].name+'</td>\n' +
-                                '                                    <td style="text-align: left;">'+d[0][i].value+'</td>\n' +
+                                '                                    <td style="width:20%;text-align: left;">'+d[0][i].uri+'</td>\n' +
+                                '                                    <td style="width:20%;text-align: left;">'+d[0][i].name+'</td>\n' +
+                                '                                    <td style="width:20%;text-align: left;">'+d[0][i].value+'</td>\n' +
                                 '                                </tr>'
                         }
 
                         for(var i=0;i<d[1].length;i++){
-                            propertyText+='<tr style="cursor:pointer">\n' +
+                            propertyText+='<tr style="width:20%;cursor:pointer">\n' +
                                 '\n' +
-                                '                <td style="text-align: left;" >'+d[1][i].uri+'</td>\n' +
-                                '                <td style="text-align: left;"\n' +
+                                '                <td style="width:20%;text-align: left;" >'+d[1][i].uri+'</td>\n' +
+                                '                <td style="width:20%;text-align: left;"\n' +
                                 '                    >'+d[1][i].name+'</td>\n' +
-                                '                <td style="text-align: left;">'+d[1][i].value+'</td>\n' +
+                                '                <td style="width:20%;text-align: left;">'+d[1][i].value+'</td>\n' +
                                 '            </tr>'
                         }
 

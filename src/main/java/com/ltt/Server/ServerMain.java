@@ -80,7 +80,7 @@ public class ServerMain {
         return patternList;
     }
 
-    public List<JSONObject> getEDPPattern(String session_id,Integer dataset_local_id){
+    public List<JSONObject> getEDPPattern(String session_id, Integer dataset_local_id){
         List<JSONObject> edpList = sessionMap.get(session_id).getEDP();
         return edpList;
     }
