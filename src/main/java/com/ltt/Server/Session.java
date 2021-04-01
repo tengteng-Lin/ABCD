@@ -517,13 +517,13 @@ public class Session {
                     Directory directory = FSDirectory.open(Paths.get(GlobalVariances.edpDir+dataset_local_id));//打开索引文件夹
                     IndexReader reader = DirectoryReader.open(directory);//读取目录
                     IndexSearcher searcherForEDP = new IndexSearcher(reader);
-                    logger.info(String.valueOf(reader.maxDoc()));
+//                    logger.info(String.valueOf(reader.maxDoc()));
 
                     //TODO sort
                     SortField sortField = new SortField("count",SortField.Type.INT,true);
                     Sort sort = new Sort(sortField);
                     TopDocs tds = searcherForEDP.search(new MatchAllDocsQuery(),500000,sort);
-                    logger.info(String.valueOf(tds.scoreDocs.length));
+//                    logger.info(String.valueOf(tds.scoreDocs.length));
 
                     List<JSONObject> result = new ArrayList<>();
                     //一个pattern一个document
@@ -534,7 +534,7 @@ public class Session {
                         Document doc = searcherForEDP.doc(tds.scoreDocs[i].doc);
                         //只有一项和空length都为1
                         String strOutProperty = doc.get("outProperty");
-                        logger.info("out property:"+strOutProperty);
+//                        logger.info("out property:"+strOutProperty);
                         if(strOutProperty.length()!=0){
                             String [] outProperty = strOutProperty.trim().split(" ");
                             for(int j=0;j<outProperty.length;j++){
@@ -552,7 +552,7 @@ public class Session {
                         }
 
                         String strInProperty = doc.get("inProperty");
-                        logger.info("in property:"+strInProperty);
+//                        logger.info("in property:"+strInProperty);
                         if(strInProperty.length()!=0){
                             String [] inProperty = strInProperty.trim().split(" "); //很可能没有进入的或出去的
 
@@ -569,7 +569,7 @@ public class Session {
                         }
 
                         String strClasses = doc.get("classes");
-                        logger.info("classes:"+strClasses);
+//                        logger.info("classes:"+strClasses);
                         if(strClasses.length()!=0){
                             String [] classes = strClasses.trim().split(" ");
                             for(int j=0;j<classes.length;j++){
@@ -591,7 +591,7 @@ public class Session {
 //                        result.add(onePattern);
                         edpPatterns.add(onePattern);
                     }
-                    System.out.println(edpPatterns);
+//                    System.out.println(edpPatterns);
 
 
 

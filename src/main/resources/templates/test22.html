@@ -89,6 +89,8 @@
         .sti-tbl-container .sti-tbl-body {
             flex-grow : 1;
             overflow-y : scroll;
+            /*display: block;*/
+            height: 200px;
         }
     </style>
 </head>
@@ -97,19 +99,73 @@
 <div class="sti-tbl-container">
     <!-- 表头容器，必须留出17px的滚动条位置 -->
     <div class="sti-tbl-header" style="padding-right:17px;">
-        <table class="table table-bordered" style="margin-bottom: 0px;border-bottom-style: none;">
+        <table class="table table-responsive" style="margin-bottom: 0px;border-bottom-style: none;">
             <tr>
-                <th style="width : 10%;">#</th>
-                <th  style="width : 20%;">First Name</th>
-                <th  style="width : 30%;">Last Name</th>
-                <th  style="width : 50%;">Username</th>
+                <th style="">#</th>
+                <th  style="">First Name</th>
+                <th  style="">Last Name</th>
+                <th  style="">Username</th>
             </tr>
         </table>
     </div>
     <!-- 表格内容容器-->
     <div class="sti-tbl-body">
-        <table class="table table-bordered">
-            <tbody>
+        <table class="table  table-responsive">
+            <tbody class="sti-tbl-body">
+            <tr>
+                <th scope="" style="">1</th>
+                <td style="">Mark</td>
+                <td style="">Otto</td>
+                <td style="">@mdo</td>
+            </tr>
+            <tr>
+                <th scope="row" style="width : 10%;">1</th>
+                <td style="width : 20%;">Mark</td>
+                <td style="width : 30%;">Otto</td>
+                <td style="width : 50%;">@mdo</td>
+            </tr>
+            <tr>
+                <th scope="row" style="width : 10%;">1</th>
+                <td style="width : 20%;">Mark</td>
+                <td style="width : 30%;">Otto</td>
+                <td style="width : 50%;">@mdo</td>
+            </tr>
+            <tr>
+                <th scope="row" style="width : 10%;">1</th>
+                <td style="width : 20%;">Mark</td>
+                <td style="width : 30%;">Otto</td>
+                <td style="width : 50%;">@mdo</td>
+            </tr>
+            <tr>
+                <th scope="row" style="width : 10%;">1</th>
+                <td style="width : 20%;">Mark</td>
+                <td style="width : 30%;">Otto</td>
+                <td style="width : 50%;">@mdo</td>
+            </tr>
+            <tr>
+                <th scope="row" style="width : 10%;">1</th>
+                <td style="width : 20%;">Mark</td>
+                <td style="width : 30%;">Otto</td>
+                <td style="width : 50%;">@mdo</td>
+            </tr>
+            <tr>
+                <th scope="row" style="width : 10%;">1</th>
+                <td style="width : 20%;">Mark</td>
+                <td style="width : 30%;">Otto</td>
+                <td style="width : 50%;">@mdo</td>
+            </tr>
+            <tr>
+                <th scope="row" style="width : 10%;">1</th>
+                <td style="width : 20%;">Mark</td>
+                <td style="width : 30%;">Otto</td>
+                <td style="width : 50%;">@mdo</td>
+            </tr>
+            <tr>
+                <th scope="row" style="width : 10%;">1</th>
+                <td style="width : 20%;">Mark</td>
+                <td style="width : 30%;">Otto</td>
+                <td style="width : 50%;">@mdo</td>
+            </tr>
             <tr>
                 <th scope="row" style="width : 10%;">1</th>
                 <td style="width : 20%;">Mark</td>

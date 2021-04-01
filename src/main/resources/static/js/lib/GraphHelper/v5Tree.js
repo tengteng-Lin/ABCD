@@ -67,13 +67,6 @@ function showCluster(dataset,divID) {
     var svg = main.append("g")
         .attr("transform", "translate(120,30)scale(0.7)");
 
-    // var g = svg
-    //     .append("g")
-    //     .attr("transform", "translate(" + margin.top + "," + margin.left + ")");
-
-    // var scale = svg
-    //     .append("g")
-    //     .attr("transform", "translate(" + margin.top + "," + margin.left + ")");
 
 // 创建一个层级布局
     var hierarchyData = d3.hierarchy(dataset).sum(function(d) {
@@ -234,11 +227,8 @@ function showCluster(dataset,divID) {
                     .attr("d", "M2,2 L10,6 L2,10 L6,6 L2,2")
                     .attr("fill", function () {
                         if (dd.target.data.type===0 || dd.source.data.type===0){
-                            // if(dd.target.data.inOrOut===0 || dd.source.data.inOrOut===0){
-                            //     return inPropertyColor
-                            // }else{
+
                                 return outPropertyColor
-                            // }
 
                         }else{
                             return classColor
@@ -272,17 +262,4 @@ function showCluster(dataset,divID) {
             return generator({ source: start, target: end });
         });
 
-
-    // g.selectAll("path")
-    //     .data(links)
-    //     .enter()
-    //     .append("path")
-    //     .attr("d", function(d) {
-    //         var start = { x: d.source.x, y: d.source.y };
-    //         var end = { x: d.target.x, y: d.target.y };
-    //         return generator({ source: start, target: end });
-    //     })
-    //     .attr("fill", "none")
-    //     .attr("stroke", "#000")
-    //     .attr("stroke-width", 1);
 }
